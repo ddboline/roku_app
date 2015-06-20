@@ -5,10 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-try:
-    from util import run_command
-except ImportError:
-    from scripts.util import run_command
+from .util import run_command
 
 def is_module_loaded(user_mod='pvrusb2'):
     ''' has module been loaded? '''

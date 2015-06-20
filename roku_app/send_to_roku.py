@@ -10,9 +10,9 @@ import time
 import requests
 
 try:
-    from util import run_command, send_command
+    from .util import run_command, send_command
 except ImportError:
-    from scripts.util import run_command, send_command
+    from roku_app.util import run_command, send_command
 
 HOMEDIR = os.getenv('HOME')
 
@@ -27,8 +27,6 @@ def send_single_keypress(keypress):
         result = requests.post('http://%s:8060/keypress/%s' % (ROKU_IP, keypress))
         if result.status_code != 200:
             return 'Error %d on keypress %s' % (result.status_code, keypress)
-        print(result.status_code)
-        print(result.text)
     return keypress
 
 def send_to_roku(arglist=None):
