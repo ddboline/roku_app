@@ -1,0 +1,183 @@
+<!DOCTYPE HTML>
+<html>
+<body>
+
+<p>
+<a href="thumbnails/00000010.jpg" target="_blank">
+<img src="thumbnails/00000010.jpg" width=470 height=350 name="refresh1">
+</a>
+<video src="test.mp4" controls="controls" width=470 height=350 id="refreshv1">
+your browser does not support the video tag
+</video>
+
+</p>
+
+<p>
+<button type="submit" onclick="processButtonDataWait('thumb');"> Thumb </button>
+<button type="submit" onclick="processButtonDataNonThumb('h');"> Home </button>
+<button type="submit" onclick="processButtonDataNonThumb('b');"> Back </button>
+<button type="submit" onclick="processButtonDataNonThumb('l');"> Left </button>
+<button type="submit" onclick="processButtonDataNonThumb('r');"> Right </button>
+<button type="submit" onclick="processButtonDataNonThumb('u');"> Up </button>
+<button type="submit" onclick="processButtonDataNonThumb('d');"> Down </button>
+<button type="submit" onclick="processButtonDataNonThumb('s');"> Select </button>
+<button type="submit" onclick="processButtonDataNonThumb('if');"> Info </button>
+<button type="submit" onclick="processTestRunData();"> Video </button>
+<button type="submit" onclick="processButtonDataNonThumb('time');"> TimeSeries </button>
+<button type="submit" onclick="updateImageRoku();updateVideoRoku();send_command_roku('output');"> Update </button>
+<form action="../../cgi-bin/control_roku.py" method="get">
+<input type="text" name="cmd" id="roku_cmd"/>
+<input type="button" name="submitROKU" value="Submit" onclick="processFormData();"/>
+<button name="rokuinp" id="rokuinput"> &nbsp; </button>
+<button name="rokuout" id="rokuoutput"> &nbsp; </button>
+</form>
+</p>
+
+<p>
+<a href="test_time.png" target="_blank">
+<img src="test_time.png" width=470 height=350 name="refresh3">
+</a>
+<a href="test_fft.png" target="_blank">
+<img src="test_fft.png" width=470 height=350 name="refresh4">
+</a>
+</p>
+
+<a href="thumbnails_tv/00000010.jpg" target="_blank">
+<img src="thumbnails_tv/00000010.jpg" width=470 height=350 name="refresh2">
+</a>
+
+<video src="temp.mp4" controls="controls" width=470 height=350 id="refreshv2">
+your browser does not support the video tag
+</video>
+</p>
+
+<p>
+<button type="submit" onclick="processButtonData2('q');"> Quit </button>
+<button type="submit" onclick="processButtonData2('0');"> t=0 </button>
+<button type="submit" onclick="processButtonData2('b10');"> t-=10min </button>
+<button type="submit" onclick="processButtonData2('f10');"> t+=10min </button>
+<button type="submit" onclick="processButtonData2('b5');"> t-=5min </button>
+<button type="submit" onclick="processButtonData2('f5');"> t+=5min </button>
+<button type="submit" onclick="processButtonData2('b1');"> t-=1min </button>
+<button type="submit" onclick="processButtonData2('f1');"> t+=1min </button>
+<button type="submit" onclick="processButtonData2('s');"> Select </button>
+<button type="submit" onclick="processButtonDataV('v');"> Video </button>
+<button type="submit" onclick="processButtonData2('t');"> TimeSeries </button>
+<button type="submit" onclick="updateImageRemcom();updateVideoRemcom();"> Update </button>
+<form action="../../cgi-bin/control_remcom.py" method="get">
+<input type="text" name="cmd" id="remcom_cmd"/>
+<input type="button" name="submitREMCOM" value="Submit" onclick="processFormData2();"/>
+<button name="remcominp" id="remcominput"> &nbsp; </button>
+<button name="remcomout" id="remcomoutput"> &nbsp; </button>
+</form>
+</p>
+
+<p>
+<a href="temp_time.png" target="_blank">
+<img src="temp_time.png" width=470 height=350 name="refresh5">
+</a>
+<a href="temp_fft.png" target="_blank">
+<img src="temp_fft.png" width=470 height=350 name="refresh6">
+</a>
+</p>
+
+<script language="JavaScript" type="text/javascript">
+    var t = 60; // interval in seconds
+    var image1 = "thumbnails/00000010.jpg";
+    var image2 = "thumbnails_tv/00000010.jpg";
+    var image3 = "test_time.png";
+    var image4 = "test_fft.png";
+    var image5 = "temp_time.png";
+    var image6 = "temp_fft.png";
+    var video1 = "test.mp4";
+    var video2 = "temp.mp4";
+    function updateImageRoku() {
+        var tmp = "?"+(new Date()).getTime();
+        document.images["refresh1"].src = image1+tmp;
+        document.images["refresh3"].src = image3+tmp;
+        document.images["refresh4"].src = image4+tmp;
+    }
+    function updateImageRemcom() {
+        var tmp2 = "?"+(new Date()).getTime();
+        document.images["refresh2"].src = image2+tmp2;
+        document.images["refresh5"].src = image5+tmp2;
+        document.images["refresh6"].src = image6+tmp2;
+    }
+    function updateVideoRoku() {
+        var tmp = "?"+(new Date()).getTime();
+        var vid1 = document.getElementById("refreshv1");
+        vid1.src = video1+tmp;
+    }
+    function updateVideoRemcom() {
+        var tmp = "?"+(new Date()).getTime();
+        var vid2 = document.getElementById("refreshv2");
+        vid2.src = video2+tmp;
+    }
+    // cleanup commands, this sends a command, dumps output
+    function send_command_roku( command ) {
+        var ostr = '../../cgi-bin/control_roku.py?cmd=' + command;
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open( "GET", ostr , true );
+        xmlhttp.onload = function load_rokuoutput() {
+            document.getElementById("rokuoutput").innerHTML = xmlhttp.responseText;
+        }
+        xmlhttp.send(null);
+    }
+    // change input, print output
+    function processButtonDataWait( value ) {
+        document.getElementById("rokuinput").innerHTML = value;
+        document.getElementById("rokuoutput").innerHTML = 'waiting';
+        send_command_roku( value );
+        setTimeout("send_command_roku('output');", 5*1000);
+        setTimeout("updateImageRoku();", 5*1000);
+        setTimeout("send_command_roku('output');", 10*1000);
+    }
+    function processButtonDataNonThumb( value ) {
+        processButtonDataWait( value );
+        setTimeout("send_command_roku('thumb');",5*1000);
+    }
+    function processFormData() {
+        var roku_cmd = document.getElementById( 'roku_cmd' );
+        processButtonDataNonThumb( roku_cmd.value );
+    }
+    function processTestRunData() {
+        document.getElementById("rokuinput").innerHTML = "test run";
+        document.getElementById("rokuoutput").innerHTML = "waiting";
+        send_command_roku( 'test');
+        setTimeout("updateImageRoku();",5*1000);
+        setTimeout("updateVideoRoku();",5*1000);
+        setTimeout("send_command_roku('output');", 5*1000);
+    }
+    function processButtonData2( value ) {
+        var ostr = '../../cgi-bin/control_remcom.py?cmd=' + value
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open( "GET", ostr , true );
+        xmlhttp.onload = function load_remcomoutput() {
+            document.getElementById("remcomoutput").innerHTML = xmlhttp.responseText;
+            updateImageRemcom();
+        }
+        document.getElementById("remcominput").innerHTML = value;
+        document.getElementById("remcomoutput").innerHTML = "waiting";
+        xmlhttp.send(null);
+    }
+    function processButtonDataV( value ) {
+        var ostr = '../../cgi-bin/control_remcom.py?cmd=' + value
+        var xmlhttp = new XMLHttpRequest();
+        xmlhttp.open( "GET", ostr , true );
+        xmlhttp.onload = function load_remcomoutput() {
+            document.getElementById("remcomoutput").innerHTML = xmlhttp.responseText;
+            updateVideoRemcom();
+            updateImageRemcom();
+        }
+        document.getElementById("remcominput").innerHTML = value;
+        document.getElementById("remcomoutput").innerHTML = "waiting";
+        xmlhttp.send(null);
+    }
+    function processFormData2() {
+        var remcom_cmd = document.getElementById( 'remcom_cmd' );
+        processButtonData2( remcom_cmd.value );
+    }
+</script>
+
+</body>
+</html>
