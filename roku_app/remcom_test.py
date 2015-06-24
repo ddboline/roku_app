@@ -9,7 +9,6 @@ from util import run_command, make_thumbnails, send_command, \
                   OpenUnixSocketServer, OpenSocketConnection
 import multiprocessing
 
-TURN_ON_COMMANDS = True
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
 HOMEDIR = os.getenv('HOME')
 
@@ -46,7 +45,7 @@ def make_test_script(input_file='', begin_time=0):
 
 
 def remcom_test(movie_filename, output_dir, begin_time, end_time,
-                socketfile=REMCOM_SOCKET_FILE, msg_q=None):
+                msg_q=None, socketfile=REMCOM_SOCKET_FILE):
     '''
         main function, takes filename, timing file as options
         communication via socket:
@@ -132,8 +131,7 @@ def remcom_test_main(movie_filename, output_dir, begin_time, end_time):
 
     net = multiprocessing.Process(target=remcom_test,
                                   args=(movie_filename, output_dir,
-                                        begin_time, end_time,
-                                        REMCOM_SOCKET_FILE, msg_q))
+                                        begin_time, end_time, msg_q))
     net.start()
     time.sleep(5)
 
