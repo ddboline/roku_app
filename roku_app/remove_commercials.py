@@ -2,6 +2,7 @@
 from __future__ import print_function
 
 import os
+from .roku_utils import get_random_hex_string
 from .util import run_command
 
 HOMEDIR = os.getenv('HOME')
@@ -11,8 +12,6 @@ def remove_commercials(INFILE='', OUTFILE='', TIMING_STRING='0,3600'):
     '''
         cut and splice recorded file to remove undesired sections (commercials)
     '''
-    from util import get_random_hex_string
-
     TEMPPRE = 'temp_%06x' % get_random_hex_string(3)
 
     def make_temp_avi(time, index):

@@ -1,5 +1,8 @@
 #!/usr/bin/python
+from __future__ import absolute_import
+from __future__ import division
 from __future__ import print_function
+from __future__ import unicode_literals
 
 import os
 import time
@@ -7,8 +10,9 @@ from select import select
 import multiprocessing
 
 from .remove_commercials import remove_commercials
-from .util import (run_command, make_thumbnails, send_command,
-                   make_audio_analysis_plots, make_time_series_plot,
+from .roku_utils import (make_thumbnails, make_audio_analysis_plots,
+                         make_time_series_plot,)
+from .util import (run_command, send_command,
                    OpenUnixSocketServer, OpenSocketConnection)
 
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
