@@ -13,9 +13,10 @@ import socket
 import logging
 
 from .get_dev import get_dev
-from .send_to_roku import send_to_roku, get_length_of_mpg, make_thumbnails
+from .send_to_roku import send_to_roku
 from .roku_utils import (make_audio_analysis_plots, make_time_series_plot,
-                         run_fix_pvr, check_dmesg_for_ooops)
+                         run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg,
+                         make_thumbnails)
 from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection, )
 
 ### Global variables, immutable

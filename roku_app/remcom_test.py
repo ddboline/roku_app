@@ -3,11 +3,13 @@ from __future__ import print_function
 
 import os
 import time
-import select
-from util import run_command, make_thumbnails, send_command, \
-                  make_audio_analysis_plots, make_time_series_plot, \
-                  OpenUnixSocketServer, OpenSocketConnection
+from select import select
 import multiprocessing
+
+from .remove_commercials import remove_commercials
+from .util import (run_command, make_thumbnails, send_command,
+                   make_audio_analysis_plots, make_time_series_plot,
+                   OpenUnixSocketServer, OpenSocketConnection)
 
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
 HOMEDIR = os.getenv('HOME')
@@ -18,22 +20,17 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
         cut and splice recorded file to remove undesired sections
         (commercials), use temp not test here...
     '''
-    import remove_commercials
     INPUT_STRING = '%d,%d' % (begin_time, end_time)
-    remove_commercials.remove_commercials(input_file,
-                                      '%s/%s' % (output_dir,
-                                      input_file.split('/')[-1]),
-                                      TIMING_STRING=INPUT_STRING)
+    remove_commercials(input_file, '%s/%s' % (output_dir,
+                                              input_file.split('/')[-1]),
+                       TIMING_STRING=INPUT_STRING)
     return 0
 
 def make_test_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
-    import remove_commercials
     INPUT_STRING = '%d,%d' % (begin_time, begin_time+10)
-    remove_commercials.remove_commercials(INFILE=input_file,
-                                          OUTFILE='%s/temp.avi'
-                                          % HOMEDIR,
-                                          TIMING_STRING=INPUT_STRING)
+    remove_commercials(INFILE=input_file, OUTFILE='%s/temp.avi' % HOMEDIR,
+                       TIMING_STRING=INPUT_STRING)
     run_command('time HandBrakeCLI -i %s/temp.avi -f mp4 -e x264 ' % HOMEDIR +
                 '-b 600 -o %s/temp.mp4 > /dev/null 2>&1\n' % HOMEDIR)
     run_command('mpv --ao=pcm:fast:file=%s/temp.wav --no-video ' % HOMEDIR +
@@ -119,7 +116,7 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
     return 0
 
 def keyboard_input():
-    i, o, e = select.select([os.sys.stdin], [], [], 0.0001)
+    i, o, e = select([os.sys.stdin], [], [], 0.0001)
     for s in i:
         if s == os.sys.stdin:
             return os.sys.stdin.readline()

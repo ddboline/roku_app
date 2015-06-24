@@ -6,70 +6,9 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import time
-import requests
 
-try:
-    from .util import run_command, send_command
-except ImportError:
-    from roku_app.util import run_command, send_command
-
-HOMEDIR = os.getenv('HOME')
-
-def send_single_keypress(keypress):
-    ''' wrapper around curl '''
-    ROKU_IP = '192.168.0.101'
-    if keypress == 'Wait':
-        time.sleep(5)
-    elif keypress == 'Gtalk':
-        run_command('%s/bin/send_to_gtalk checkRoku' % HOMEDIR)
-    else:
-        result = requests.post('http://%s:8060/keypress/%s' % (ROKU_IP, keypress))
-        if result.status_code != 200:
-            return 'Error %d on keypress %s' % (result.status_code, keypress)
-    return keypress
-
-def send_to_roku(arglist=None):
-    ''' main function, thumb and test run send message to record_roku, q quits, everything else sends to roku device '''
-
-    retval = ''
-
-    command_shortcuts = {'h': 'Home',
-                      'l': 'Left',
-                      'r': 'Right',
-                      's': 'Select',
-                      'f': 'Fwd',
-                      'b': 'Back',
-                      'u': 'Up',
-                      'd': 'Down',
-                      'p': 'Play',
-                      'w': 'Wait',
-                      'g': 'Gtalk',
-                      'rv': 'Rev',
-                      'ir': 'InstantReplay',
-                      'if': 'Info',
-                      'bs': 'Backspace',
-                      'sc': 'Search',
-                      'en': 'Enter',
-                      'as': 'Lit_*',}
-
-    if not arglist or len(arglist) == 0:
-        return retval
-
-    for arg in arglist:
-        if arg in ['thumb', 'test', 'q']:
-            retval = '%s%s' % (retval, send_command(arg, portno=10888))
-        elif arg == 'run':
-            time.sleep(5)
-            print('run\n')
-            run_command('sh %s/netflix/test.sh' % HOMEDIR)
-            retval = '%srun' % retval
-        elif arg in command_shortcuts:
-            retval = send_single_keypress(command_shortcuts[arg])
-            retval = '%s%s' % (retval, 'command %s' % arg)
-        else:
-            retval = send_single_keypress(arg)
-    return retval
+from roku_app.util import run_command
+from roku_app.roku_utils import send_to_roku, HOMEDIR
 
 if __name__ == '__main__':
     hostname = os.uname()[1]
