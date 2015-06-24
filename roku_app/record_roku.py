@@ -7,13 +7,12 @@ from __future__ import print_function
 
 import os
 import time
-import get_dev
 import subprocess
 import multiprocessing
 import socket
-import tempfile
 import logging
 
+from .get_dev import get_dev
 from .send_to_roku import send_to_roku
 from .util import (run_command, get_length_of_mpg, make_thumbnails,
                    run_fix_pvr, check_dmesg_for_ooops,
@@ -30,23 +29,25 @@ def list_running_recordings(devname='/dev/video0'):
     ''' list any currently running recordings '''
     pids = []
     _cmd = 'fuser -a %s 2> /dev/null' % devname
-    for line in run_command(_cmd, do_popen=True):
-        try:
-            pids.append(int(line.strip()))
-        except ValueError:
-            pass
-    for line in run_command('ps -eF 2> /dev/null', do_popen=True):
-        ents = line.strip().split()
-        try:
-            pid = int(ents[1])
-            ppid = int(ents[2])
-            if pid in pids or ppid in pids:
-                if pid not in pids:
-                    pids.append(pid)
-                if ppid not in pids:
-                    pids.append(ppid)
-        except ValueError:
-            continue
+    with run_command(_cmd, do_popen=True) as pop_:
+        for line in pop_:
+            try:
+                pids.append(int(line.strip()))
+            except ValueError:
+                pass
+    with run_command('ps -eF 2> /dev/null', do_popen=True) as pop_:
+        for line in pop_:
+            ents = line.strip().split()
+            try:
+                pid = int(ents[1])
+                ppid = int(ents[2])
+                if pid in pids or ppid in pids:
+                    if pid not in pids:
+                        pids.append(pid)
+                    if ppid not in pids:
+                        pids.append(ppid)
+            except ValueError:
+                continue
     return pids
 
 def kill_running_recordings(pids=None):
@@ -77,7 +78,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
         exit(1)
 
     fix_pvr_process = multiprocessing.Process(target=run_fix_pvr,\
-                              args=(True, do_fix_pvr))
+                              args=(do_fix_pvr,))
     fix_pvr_process.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(fix_pvr_process.pid)
 
@@ -99,38 +100,31 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
     return
 
-def make_test_script(prefix='test_roku', begin_time=0,
-                     use_handbrake_for_test_script=False):
-    ''' write script to create small test video file '''
-    TMPFILE = tempfile.NamedTemporaryFile(delete=False)
-    with open(TMPFILE, 'w') as outfile:
-        outfile.write('#!/bin/bash\n')
-        if use_handbrake_for_test_script:
-            outfile.write('time HandBrakeCLI ')
-            outfile.write('-i ~/netflix/mpg/%s_0.mpg ' % prefix)
-            outfile.write('-f mp4 -e x264 -b 600 --encoder-preset ultrafast ')
-            outfile.write('--start-at duration:%d ' % begin_time)
-            outfile.write('--stop-at duration:10 -o ~/test.mp4 ')
-            outfile.write('> ~/netflix/log/test.out 2>&1\n')
-        else:
-            outfile.write('time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix)
-            outfile.write('-ss %s -endpos 10 -ovc lavc ' % begin_time)
-            outfile.write('-oac mp3lame ')
-            outfile.write('-lavcopts vcodec=mpeg4:vbitrate=600:threads=2 ')
-            outfile.write('-lameopts fast:preset=medium -idx -o ~/test.avi ')
-            outfile.write('> ~/netflix/log/test.out 2>&1\n')
-            outfile.write('mpv --ao=pcm:fast:file=/home/ddboline/test.wav ')
-            outfile.write('--no-video ~/test.avi > /dev/null 2>&1\n')
-            outfile.write('time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ')
-            outfile.write('-b 600 -o ~/test.mp4 >> ')
-            outfile.write('~/netflix/log/test.out 2>&1\n')
-        outfile.write('mv ~/test.mp4 ~/public_html/videos/\n')
-        outfile.write('python -c "from scripts.record_roku ')
-        outfile.write('import make_audio_analysis_plots ; ')
-        outfile.write('make_audio_analysis_plots(\'test.wav\', ')
-        outfile.write('prefix=\'test\')"\n')
-    os.rename(TMPFILE, TESTSCRIPT)
-    return begin_time
+def make_test_video(prefix='test_roku', begin_time=0,
+                    use_handbrake_for_test_script=False):
+    ''' write video file, then run audio analysis on it '''
+    if use_handbrake_for_test_script:
+        cmd_ = 'time HandBrakeCLI ' + \
+               '-i ~/netflix/mpg/%s_0.mpg ' % prefix + \
+               '-f mp4 -e x264 -b 600 --encoder-preset ultrafast ' + \
+               '--start-at duration:%d ' % begin_time + \
+               '--stop-at duration:10 -o ~/test.mp4 ' + \
+               '> ~/netflix/log/test.out 2>&1\n'
+    else:
+        cmd_ = 'time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix + \
+                '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
+                '-oac mp3lame ' + \
+                '-lavcopts vcodec=mpeg4:vbitrate=600:threads=2 ' + \
+                '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
+                '> ~/netflix/log/test.out 2>&1 && ' + \
+                'mpv --ao=pcm:fast:file=%s/test.wav ' % HOMEDIR + \
+                '--no-video ~/test.avi > /dev/null 2>&1 && ' + \
+                'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
+                '-b 600 -o ~/test.mp4 >> ' + \
+                '~/netflix/log/test.out 2>&1'
+    run_command(cmd_)
+    run_command('mv ~/test.mp4 ~/public_html/videos/')
+    make_audio_analysis_plots('%s/test.wav' % HOMEDIR, prefix='test')
 
 def make_transcode_script(prefix='test_roku',
                           use_handbrake_for_transcode=False):
@@ -262,15 +256,7 @@ def make_test_file(prefix='test_roku', run_script=False):
     _st = -1
     if _time > 0:
         make_thumbnails(prefix, begin_time=_time-1)
-        make_test_script(prefix, _time-10)
-        if run_script:
-            run_command('sh %s' % TESTSCRIPT)
-            try:
-                _st = make_audio_analysis_plots('%s/test.wav' % HOMEDIR,
-                                               prefix='test')
-            except Exception:
-                print('failed')
-                return -1, -1
+        make_test_video(prefix, _time-10)
     return _time, _st
 
 
@@ -374,7 +360,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
             name, duration, fix_pvr (optional),
     '''
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
-    device = get_dev.get_dev('pvrusb')
+    device = get_dev('pvrusb')
 
     logfname = '%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name)
     logging.basicConfig(filename=logfname)
