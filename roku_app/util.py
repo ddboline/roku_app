@@ -153,7 +153,7 @@ def print_m_s(second):
     else:
         return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
-def run_fix_pvr(turn_on_commands=True, unload_module=True):
+def run_fix_pvr(unload_module=True):
     '''
         unload pvrusb2, wait 10s, reload it
         fix permissions in /sys/class/pvrusb2
@@ -162,21 +162,18 @@ def run_fix_pvr(turn_on_commands=True, unload_module=True):
     import time
     from get_dev import is_module_loaded
     if unload_module:
-        run_command('sudo modprobe -r pvrusb2',
-                    turn_on_commands=turn_on_commands)
+        run_command('sudo modprobe -r pvrusb2')
         time.sleep(10)
         while is_module_loaded('pvrusb2'):
             time.sleep(10)
-        run_command('sudo modprobe pvrusb2', turn_on_commands=turn_on_commands)
+        run_command('sudo modprobe pvrusb2')
         time.sleep(20)
         while not is_module_loaded('pvrusb2'):
             time.sleep(10)
     run_command(
-        'sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/',
-        turn_on_commands=turn_on_commands)
+        'sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/')
     run_command('sudo chown ddboline:ddboline ' + 
-                '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor',
-                turn_on_commands=turn_on_commands)
+                '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor')
 
     sdir = '/sys/class/pvrusb2/sn-5370885'
 
