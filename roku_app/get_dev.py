@@ -21,22 +21,21 @@ def get_dev(user_mod=''):
     if user_mod == 'bttv0':
         user_mod = 'bttv'
 
-    lsfile = run_command('ls /dev/video*', do_popen=True)
-
-    for line in lsfile.readlines():
-        devname = line.strip()
-
-        if not os.path.exists('/usr/bin/v4l-info'):
-            print('YOU NEED TO INSTALL v4l-conf')
-            exit(0)
-        v4linfo = run_command('v4l-info %s 2> /dev/null | grep driver'
-                              % devname, do_popen=True)
-        driver = ''
-        for line in v4linfo.readlines():
-            if line != '':
-                driver = line.split()[2].strip('"')
-        if user_mod in driver or (not user_mod and driver == 'em28xx'):
-            return devname
+    with run_command('ls /dev/video*', do_popen=True) as pop_:
+        for line in pop_:
+            devname = line.strip()
+    
+            if not os.path.exists('/usr/bin/v4l-info'):
+                print('YOU NEED TO INSTALL v4l-conf')
+                exit(0)
+            driver = ''
+            with run_command('v4l-info %s 2> /dev/null | grep driver'
+                             % devname, do_popen=True) as v4linfo:
+                for line in v4linfo:
+                    if line != '':
+                        driver = line.split()[2].strip('"')
+                if user_mod in driver or (not user_mod and driver == 'em28xx'):
+                    return devname
 
 if __name__ == '__main__':
     user_module = ''
