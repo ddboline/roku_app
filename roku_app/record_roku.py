@@ -13,11 +13,10 @@ import socket
 import logging
 
 from .get_dev import get_dev
-from .send_to_roku import send_to_roku
-from .util import (run_command, get_length_of_mpg, make_thumbnails,
-                   run_fix_pvr, check_dmesg_for_ooops,
-                   make_audio_analysis_plots, make_time_series_plot,
-                   OpenUnixSocketServer, OpenSocketConnection)
+from .send_to_roku import send_to_roku, get_length_of_mpg, make_thumbnails
+from .roku_utils import (make_audio_analysis_plots, make_time_series_plot,
+                         run_fix_pvr, check_dmesg_for_ooops)
+from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection, )
 
 ### Global variables, immutable
 HOMEDIR = os.getenv('HOME')
