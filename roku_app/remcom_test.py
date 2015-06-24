@@ -132,7 +132,7 @@ def remcom_test_main(movie_filename, output_dir, begin_time, end_time):
 
     net = multiprocessing.Process(target=remcom_test,
                                   args=(movie_filename, output_dir,
-                                        _begin_time, _end_time,
+                                        begin_time, end_time,
                                         REMCOM_SOCKET_FILE, msg_q))
     net.start()
     time.sleep(5)
@@ -156,15 +156,3 @@ def remcom_test_main(movie_filename, output_dir, begin_time, end_time):
             break
         time.sleep(1)
     net.join(10)
-
-if __name__ == '__main__':
-    if len(os.sys.argv) > 4:
-        movie_filename = os.sys.argv[1]
-        output_dir = os.sys.argv[2]
-        _begin_time = int(os.sys.argv[3])
-        _end_time = int(os.sys.argv[4])
-    else:
-        print('python remcom_test.py <file> <dir> <begin> <end>')
-        exit(0)
-
-    remcom_test_main(movie_filename, output_dir, _begin_time, _end_time)
