@@ -11,7 +11,8 @@ import get_dev
 import subprocess
 import multiprocessing
 import socket
-import lockfile
+import tempfile
+import logging
 
 from .send_to_roku import send_to_roku
 from .util import (run_command, get_length_of_mpg, make_thumbnails,
@@ -20,21 +21,10 @@ from .util import (run_command, get_length_of_mpg, make_thumbnails,
                    OpenUnixSocketServer, OpenSocketConnection)
 
 ### Global variables, immutable
-USE_MPLAYER = True
-USE_HANDBAKE_FOR_TEST_SCRIPT = False
-USE_HANDBAKE_FOR_TRANSCODE_SCRIPT = False
-DEVICE = '/dev/video0'
-TURN_ON_COMMANDS = True
 HOMEDIR = os.getenv('HOME')
-
-ROKU_SOCKET_FILE = '/tmp/.record_roku_socket'
-MAINLOCK = '/tmp/.record_roku.lock'
 TESTSCRIPT = '%s/netflix/test.sh' % HOMEDIR
 KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
-
-GLOBAL_LOCKFILES = {}
 GLOBAL_LIST_OF_SUBPROCESSES = []
-LOGFILE = None
 
 def list_running_recordings(devname='/dev/video0'):
     ''' list any currently running recordings '''
@@ -87,7 +77,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
         exit(1)
 
     fix_pvr_process = multiprocessing.Process(target=run_fix_pvr,\
-                              args=(TURN_ON_COMMANDS, do_fix_pvr))
+                              args=(True, do_fix_pvr))
     fix_pvr_process.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(fix_pvr_process.pid)
 
@@ -105,18 +95,17 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
     if msg_q:
         msg_q.put('roku initialized')
-    if LOGFILE:
-        LOGFILE.write('roku initialized\n')
-        LOGFILE.flush()
+    logging.info('roku initialized\n')
 
     return
 
-def make_test_script(prefix='test_roku', begin_time=0):
+def make_test_script(prefix='test_roku', begin_time=0,
+                     use_handbrake_for_test_script=False):
     ''' write script to create small test video file '''
-    get_lockfile()
-    with open(TESTSCRIPT, 'w') as outfile:
+    TMPFILE = tempfile.NamedTemporaryFile(delete=False)
+    with open(TMPFILE, 'w') as outfile:
         outfile.write('#!/bin/bash\n')
-        if USE_HANDBAKE_FOR_TEST_SCRIPT:
+        if use_handbrake_for_test_script:
             outfile.write('time HandBrakeCLI ')
             outfile.write('-i ~/netflix/mpg/%s_0.mpg ' % prefix)
             outfile.write('-f mp4 -e x264 -b 600 --encoder-preset ultrafast ')
@@ -140,10 +129,11 @@ def make_test_script(prefix='test_roku', begin_time=0):
         outfile.write('import make_audio_analysis_plots ; ')
         outfile.write('make_audio_analysis_plots(\'test.wav\', ')
         outfile.write('prefix=\'test\')"\n')
-    remove_lockfile()
+    os.rename(TMPFILE, TESTSCRIPT)
     return begin_time
 
-def make_transcode_script(prefix='test_roku'):
+def make_transcode_script(prefix='test_roku',
+                          use_handbrake_for_transcode=False):
     '''
         write out transcode file at the end of the recording,
         will be used to convert mpg to avi / mp4 later on
@@ -155,7 +145,7 @@ def make_transcode_script(prefix='test_roku'):
 
     with open('%s/netflix/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
         outfile.write('#!/bin/bash\n')
-        if USE_HANDBAKE_FOR_TRANSCODE_SCRIPT:
+        if use_handbrake_for_transcode:
             outfile.write('nice -n 19 HandBrakeCLI ')
             outfile.write('-i ~/netflix/mpg/%s_0.mpg -f mp4 -e x264 ' % prefix)
             outfile.write('-b 600 --encoder-preset ultrafast ')
@@ -170,15 +160,14 @@ def make_transcode_script(prefix='test_roku'):
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
 
 def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
-                  socketfile=ROKU_SOCKET_FILE):
+                  socketfile='/tmp/.record_roku_socket'):
     '''
         the server thread
         listen for requests to write thumbnail/test-script
         q, thumb, test, and time are run separately
         all others are passed to send_to_roku
     '''
-    if LOGFILE:
-        LOGFILE.write('starting network_thread\n')
+    logging.info('starting network_thread\n')
 
     with OpenUnixSocketServer(socketfile) as sock:
         last_output_message = 'waiting'
@@ -205,19 +194,15 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                         outstring.append(last_output_message)
                     else:
                         if cmd_q:
-                            ### put everything else in cmd_queue, don't do output here
                             cmd_queue.append(arg)
                 if cmd_queue:
-                    ### keep multicommand entries in order...
                     temp = ' '.join(cmd_queue)
-                    #msg_q.put('sending command %s' % temp)
                     cmd_q.put('command %s' % temp)
                 if outstring:
                     outstring = '\n'.join(outstring)
                 else:
                     outstring = 'waiting'
-                if LOGFILE:
-                    LOGFILE.write(outstring)
+                logging.info(outstring)
                 try:
                     conn.send(outstring)
                 except socket.error:
@@ -246,11 +231,10 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                         if os.path.exists(fname):
                             _time = get_length_of_mpg(fname)
                             if _time > 0:
-                                _ts = make_thumbnails(prefix,
-                                                     begin_time=_time-1,
-                                                     use_mplayer=USE_MPLAYER)
-                                outstring = 'got thumbnail at t=%d %d' % (_ts,
-                                            int(_ts)/60)
+                                _ts = make_thumbnails(prefix, 
+                                                      begin_time=_time-1)
+                                outstring = 'got thumbnail at t=%d %d' % (
+                                            _ts, int(_ts)/60)
                             else:
                                 outstring = 'ERROR: NO FILE FOUND %s' % prefix
                     elif _cmd == 'test':
@@ -277,7 +261,7 @@ def make_test_file(prefix='test_roku', run_script=False):
     _time = get_length_of_mpg(fname)
     _st = -1
     if _time > 0:
-        make_thumbnails(prefix, begin_time=_time-1, use_mplayer=USE_MPLAYER)
+        make_thumbnails(prefix, begin_time=_time-1)
         make_test_script(prefix, _time-10)
         if run_script:
             run_command('sh %s' % TESTSCRIPT)
@@ -320,22 +304,20 @@ def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                 run_command('send_to_gtalk \"check_now\"')
     return 0
 
-def start_recording(prefix='test_roku', msg_q=None, cmd_q=None):
+def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
+                    cmd_q=None, use_mplayer=True):
     ''' begin recording, star control, monioring, server threads '''
     import shlex
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
-    if USE_MPLAYER:
-        _cmd = 'mplayer %s -dumpstream -dumpfile %s 2>&' % (DEVICE, fname)
+    if use_mplayer:
+        _cmd = 'mplayer %s -dumpstream -dumpfile %s 2>&' % (device, fname)
     else:
-        _cmd = 'mpv %s --stream-dump=%s 2>&' % (DEVICE, fname)
-    if LOGFILE:
-        LOGFILE.write('%s\n' % _cmd)
+        _cmd = 'mpv %s --stream-dump=%s 2>&' % (device, fname)
+    logging.info('%s\n' % _cmd)
     args = shlex.split(_cmd)
     recording_process = subprocess.Popen(args, shell=False)
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
-    if LOGFILE:
-        LOGFILE.write('recording pid: %s\n' % recording_process.pid)
-        LOGFILE.flush()
+    logging.info('recording pid: %s\n' % recording_process.pid)
 
     monitoring = multiprocessing.Process(target=monitoring_thread,
                                          args=(prefix, msg_q, cmd_q,))
@@ -384,26 +366,6 @@ def stop_recording(prefix='test_roku'):
         run_command('sh %s ; rm %s' % (KILLSCRIPT, KILLSCRIPT))
     return
 
-def get_lockfile(lockf=MAINLOCK):
-    ''' function to obtain lockfile '''
-    if lockf not in GLOBAL_LOCKFILES:
-        GLOBAL_LOCKFILES[lockf] = lockfile.FileLock(lockf)
-    try:
-        GLOBAL_LOCKFILES[lockf].acquire(20)
-    except Exception:
-        GLOBAL_LOCKFILES[lockf].break_lock()
-        GLOBAL_LOCKFILES[lockf].acquire()
-
-def remove_lockfile(lockf=MAINLOCK):
-    ''' function to unlock, remove lockfile '''
-    if lockf in GLOBAL_LOCKFILES:
-        try:
-            GLOBAL_LOCKFILES[lockf].release()
-        except Exception:
-            return
-    else:
-        os.remove(lockf)
-
 def record_roku(recording_name='test_roku', recording_time=3600,
                 do_fix_pvr=False):
     '''
@@ -411,33 +373,32 @@ def record_roku(recording_name='test_roku', recording_time=3600,
         options:
             name, duration, fix_pvr (optional),
     '''
-    global DEVICE, LOGFILE
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
-    DEVICE = get_dev.get_dev('pvrusb')
+    device = get_dev.get_dev('pvrusb')
 
-    LOGFILE = open('%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name), 'w')
-    LOGFILE.write('recording %s for %d seconds\n' % (recording_name,
+    logfname = '%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name)
+    logging.basicConfig(filename=logfname)
+    logging.info('recording %s for %d seconds\n' % (recording_name,
                                                      recording_time))
 
     ### This needs to run before the server_thread is started
     if recording_name != 'test_roku':
         kill_running_recordings()
-        pids = list_running_recordings(DEVICE)
+        pids = list_running_recordings(device)
         kill_running_recordings(pids)
-        LOGFILE.write('killing %s \n' % pids)
+        logging.info('killing %s \n' % pids)
     else:
-        pids = list_running_recordings(DEVICE)
+        pids = list_running_recordings(device)
         if len(pids) > 0:
             print('already recording %s\n' % pids)
-            LOGFILE.write('already recording %s\n' % pids)
+            logging.error('already recording %s\n' % pids)
             exit(0)
 
     msg_q = multiprocessing.Queue()
     cmd_q = multiprocessing.Queue()
 
     net = multiprocessing.Process(target=server_thread,
-                                  args=(recording_name, msg_q, cmd_q,
-                                        ROKU_SOCKET_FILE,))
+                                  args=(recording_name, msg_q, cmd_q,))
     net.start()
     cmd = multiprocessing.Process(target=command_thread,
                                   args=(recording_name, msg_q, cmd_q,))
@@ -446,8 +407,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
 
     initialize_roku(do_fix_pvr, msg_q)
 
-    rec, mon = start_recording(recording_name, msg_q, cmd_q)
-    LOGFILE.flush()
+    rec, mon = start_recording(device, recording_name, msg_q, cmd_q)
     with open(KILLSCRIPT, 'w') as outfile:
         outfile.write('kill -9 %d %d %d %d %d\n' %
                 (net.pid, cmd.pid, mon.pid, rec.pid, os.getpid()))
@@ -457,8 +417,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     ### use cmd_q to change update time, not msg_q
     cmd_q.put('monitor 10')
     msg_q.put('finished recording')
-    LOGFILE.write('finished recording\n')
-    LOGFILE.flush()
+    logging.info('finished recording\n')
     signal_finish(recording_name)
 
     if recording_name != 'test_roku':
@@ -466,7 +425,6 @@ def record_roku(recording_name='test_roku', recording_time=3600,
 
     msg_q.put('killing everything')
 
-    LOGFILE.close()
     stop_recording(recording_name)
     GLOBAL_LIST_OF_SUBPROCESSES.remove(net.pid)
     GLOBAL_LIST_OF_SUBPROCESSES.remove(mon.pid)
