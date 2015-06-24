@@ -10,8 +10,6 @@ from __future__ import unicode_literals
 import os
 from roku_app.record_roku import record_roku
 
-from roku_app import roku_app
-
 if __name__ == '__main__':
     _recording_name = 'test_roku'
     _recording_time = 3600
@@ -28,9 +26,6 @@ if __name__ == '__main__':
         if os.sys.argv[3] == 'fix_pvr':
             _do_fix_pvr = True
 
-    record_pid = record_roku(recording_name=_recording_name,
+    record_roku(recording_name=_recording_name,
                              recording_time=_recording_time,
                              do_fix_pvr=_do_fix_pvr)
-
-    print('record_pid', record_pid)
-    roku_app.run(debug=True)
