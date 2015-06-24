@@ -10,8 +10,6 @@ from __future__ import unicode_literals
 import os
 from roku_app.remcom_test import remcom_test_main
 
-from roku_app import roku_app
-
 if __name__ == '__main__':
     if len(os.sys.argv) > 4:
         movie_filename = os.sys.argv[1]
@@ -23,6 +21,3 @@ if __name__ == '__main__':
         exit(0)
 
     remcom_test_main(movie_filename, output_dir, _begin_time, _end_time)
-
-    print('movie_filename', movie_filename)
-    roku_app.run(debug=True)
