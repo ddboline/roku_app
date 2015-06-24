@@ -18,7 +18,7 @@ class PopenWrapperClass(object):
     def __enter__(self):
         self.pop_ = Popen(self.command, shell=True, stdout=PIPE,
                           close_fds=True)
-        return self.pop_
+        return self.pop_.stdout
 
     def __exit__(self, exc_type, exc_value, traceback):
         if hasattr(self.pop_, '__exit__'):
@@ -39,7 +39,7 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         return PopenWrapperClass(command)
     elif single_line:
         with PopenWrapperClass(command) as pop_:
-            return pop_.stdout.read()
+            return pop_.read()
     else:
         return call(command, shell=True)
 
@@ -160,7 +160,7 @@ def run_fix_pvr(unload_module=True):
         hope the kernel doesn't ooops
     '''
     import time
-    from get_dev import is_module_loaded
+    from .get_dev import is_module_loaded
     if unload_module:
         run_command('sudo modprobe -r pvrusb2')
         time.sleep(10)
