@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import time
 import subprocess
-import multiprocessing
+from multiprocessing import Queue, Process, Value
 import socket
 import logging
 
@@ -77,7 +77,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
         kill_running_recordings(GLOBAL_LIST_OF_SUBPROCESSES)
         exit(1)
 
-    fix_pvr_process = multiprocessing.Process(target=run_fix_pvr,\
+    fix_pvr_process = Process(target=run_fix_pvr,\
                               args=(do_fix_pvr,))
     fix_pvr_process.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(fix_pvr_process.pid)
@@ -305,7 +305,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
     logging.info('recording pid: %s\n' % recording_process.pid)
 
-    monitoring = multiprocessing.Process(target=monitoring_thread,
+    monitoring = Process(target=monitoring_thread,
                                          args=(prefix, msg_q, cmd_q,))
     monitoring.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(monitoring.pid)
@@ -380,13 +380,13 @@ def record_roku(recording_name='test_roku', recording_time=3600,
             logging.error('already recording %s\n' % pids)
             exit(0)
 
-    msg_q = multiprocessing.Queue()
-    cmd_q = multiprocessing.Queue()
+    msg_q = Queue()
+    cmd_q = Queue()
 
-    net = multiprocessing.Process(target=server_thread,
+    net = Process(target=server_thread,
                                   args=(recording_name, msg_q, cmd_q,))
     net.start()
-    cmd = multiprocessing.Process(target=command_thread,
+    cmd = Process(target=command_thread,
                                   args=(recording_name, msg_q, cmd_q,))
     cmd.start()
     GLOBAL_LIST_OF_SUBPROCESSES.extend([net.pid, cmd.pid])

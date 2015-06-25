@@ -9,9 +9,10 @@ from .util import run_command
 
 def is_module_loaded(user_mod='pvrusb2'):
     ''' has module been loaded? '''
-    for line in run_command('lsmod', do_popen=True):
-        if user_mod in line:
-            return True
+    with run_command('lsmod', do_popen=True) as pop_:
+        for line in pop_:
+            if user_mod in line:
+                return True
     return False
 
 def get_dev(user_mod=''):
