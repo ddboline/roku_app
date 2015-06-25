@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import time
 import subprocess
-from multiprocessing import Queue, Process, Value
+from multiprocessing import Queue, Process
 import socket
 import logging
 
@@ -195,7 +195,7 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                 if outstring:
                     outstring = '\n'.join(outstring)
                 else:
-                    outstring = 'waiting'
+                    outstring = last_output_message
                 logging.info(outstring)
                 try:
                     conn.send(outstring)
@@ -362,8 +362,8 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
     device = get_dev('pvrusb')
 
-    logfname = '%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name)
-    logging.basicConfig(filename=logfname)
+#    logfname = '%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name)
+#    logging.basicConfig(filename=logfname)
     logging.info('recording %s for %d seconds\n' % (recording_name,
                                                      recording_time))
 
