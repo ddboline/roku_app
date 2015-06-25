@@ -7,7 +7,7 @@ from __future__ import print_function
 
 import os
 import time
-import subprocess
+from subprocess import Popen
 from multiprocessing import Queue, Process
 import socket
 import logging
@@ -301,7 +301,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
         _cmd = 'mpv %s --stream-dump=%s 2>&' % (device, fname)
     logging.info('%s\n' % _cmd)
     args = shlex.split(_cmd)
-    recording_process = subprocess.Popen(args, shell=False)
+    recording_process = Popen(args, shell=False)
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
     logging.info('recording pid: %s\n' % recording_process.pid)
 
@@ -362,8 +362,6 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
     device = get_dev('pvrusb')
 
-#    logfname = '%s/netflix/log/%s_0.out' % (HOMEDIR, recording_name)
-#    logging.basicConfig(filename=logfname)
     logging.info('recording %s for %d seconds\n' % (recording_name,
                                                      recording_time))
 
@@ -386,6 +384,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     net = Process(target=server_thread,
                                   args=(recording_name, msg_q, cmd_q,))
     net.start()
+
     cmd = Process(target=command_thread,
                                   args=(recording_name, msg_q, cmd_q,))
     cmd.start()
