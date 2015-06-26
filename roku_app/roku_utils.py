@@ -139,9 +139,9 @@ def make_time_series_plot(input_file='', prefix='temp'):
     length_of_file = get_length_of_mpg(input_file)
     audio_vals = []
     for t in range(0,length_of_file, 60):
-        run_command('mpv --start=%d ' % t + 
+        run_command('mpv --start=%d ' % t +
                     '--length=10 --ao=pcm:fast:file=%s/' % HOMEDIR +
-                    '%s.wav --no-video ' % prefix + 
+                    '%s.wav --no-video ' % prefix +
                     '%s 2> /dev/null > /dev/null' % input_file)
         aud_int = make_audio_analysis_plots('%s/%s.wav' % (HOMEDIR, prefix),
                                             make_plots=False, do_fft=False)
@@ -200,8 +200,8 @@ def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
         return -1
     run_command('mkdir -p %s' % output_dir)
     if use_mplayer:
-        run_command('mplayer -ao null -vo jpeg:outdir=%s ' % TMPDIR + 
-                    '-frames 10 -ss %s ' % begin_time + 
+        run_command('mplayer -ao null -vo jpeg:outdir=%s ' % TMPDIR +
+                    '-frames 10 -ss %s ' % begin_time +
                     '%s 2> /dev/null > /dev/null' % input_file)
     else:
         run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s ' % TMPDIR +
@@ -239,7 +239,7 @@ def run_fix_pvr(unload_module=True):
             time.sleep(10)
     run_command(
         'sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/')
-    run_command('sudo chown ddboline:ddboline ' + 
+    run_command('sudo chown ddboline:ddboline ' +
                 '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor')
 
     sdir = '/sys/class/pvrusb2/sn-5370885'
@@ -288,4 +288,3 @@ def play_roku():
     f.close()
 
     recording_process.wait()
-

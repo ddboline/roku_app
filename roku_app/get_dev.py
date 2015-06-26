@@ -25,7 +25,7 @@ def get_dev(user_mod=''):
     with run_command('ls /dev/video*', do_popen=True) as pop_:
         for line in pop_:
             devname = line.strip()
-    
+
             if not os.path.exists('/usr/bin/v4l-info'):
                 print('YOU NEED TO INSTALL v4l-conf')
                 exit(0)

@@ -14,11 +14,11 @@ import logging
 
 from .get_dev import get_dev
 from .send_to_roku import send_to_roku
-from .roku_utils import (make_audio_analysis_plots_wrapper, 
+from .roku_utils import (make_audio_analysis_plots_wrapper,
                          make_time_series_plot_wrapper,
                          run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg,
                          make_thumbnails)
-from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection, )
+from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection,)
 
 ### Global variables, immutable
 HOMEDIR = os.getenv('HOME')
@@ -126,7 +126,7 @@ def make_test_video(prefix='test_roku', begin_time=0,
     run_command(cmd_)
 
     run_command('mv ~/test.mp4 ~/public_html/videos/')
-    
+
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
     make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR, prefix='test')
@@ -231,7 +231,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                         if os.path.exists(fname):
                             _time = get_length_of_mpg(fname)
                             if _time > 0:
-                                _ts = make_thumbnails(prefix, 
+                                _ts = make_thumbnails(prefix,
                                                       begin_time=_time-1)
                                 outstring = 'got thumbnail at t=%d %d' % (
                                             _ts, int(_ts)/60)
@@ -266,7 +266,7 @@ def make_test_file(prefix='test_roku'):
         make_thumbnails(prefix, begin_time=_time-1)
 
         make_test_video(prefix, _time-10)
-        
+
     return _time, _st
 
 
@@ -311,7 +311,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
         _cmd = 'mpv %s --stream-dump=%s 2>&' % (device, fname)
     logging.info('%s\n' % _cmd)
     args = shlex.split(_cmd)
-    
+
     recording_process = Popen(args, shell=False)
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
     logging.info('recording pid: %s\n' % recording_process.pid)
@@ -319,7 +319,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     monitoring = Process(target=monitoring_thread,
                                          args=(prefix, msg_q, cmd_q,))
     monitoring.start()
-    
+
     GLOBAL_LIST_OF_SUBPROCESSES.append(monitoring.pid)
 
     time.sleep(5)
@@ -338,7 +338,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
         else:
             run_command('send_to_gtalk \"%s\"' % _msg)
         send_to_roku(['s'])
-    
+
     time.sleep(5)
 
     make_test_file(prefix)
