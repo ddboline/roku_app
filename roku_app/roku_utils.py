@@ -13,6 +13,7 @@ import os
 import time
 import requests
 
+from multiprocessing import Process
 from subprocess import Popen, PIPE
 
 from .util import run_command, send_command
@@ -122,6 +123,13 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
 
     return float(np.sum(np.abs(sig_fft0)))
 
+def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
+                              do_fft=True):
+    tmp_ = Process(target=make_audio_analysis_plots,
+                  args=(infile, prefix, make_plots, do_fft,))
+    tmp_.start()
+    tmp_.join()
+
 def make_time_series_plot(input_file='', prefix='temp'):
     import numpy as np
     import matplotlib
@@ -147,6 +155,12 @@ def make_time_series_plot(input_file='', prefix='temp'):
     pl.clf()
     run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix,
                                                               HOMEDIR))
+    return 'Done'
+
+def make_time_series_plot_wrapper(input_file='', prefix='temp'):
+    tmp_ = Process(target=make_time_series_plot, args=(input_file, prefix,))
+    tmp_.start()
+    tmp_.join()
     return 'Done'
 
 def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
@@ -274,3 +288,4 @@ def play_roku():
     f.close()
 
     recording_process.wait()
+
