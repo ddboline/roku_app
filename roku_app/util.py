@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
+'''
+    Utility functions
+'''
+
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -12,8 +16,10 @@ from subprocess import call, Popen, PIPE
 HOMEDIR = os.getenv('HOME')
 
 class PopenWrapperClass(object):
+    ''' Popen wrapper for context manager '''
     def __init__(self, command):
         self.command = command
+        self.pop_ = None
 
     def __enter__(self):
         self.pop_ = Popen(self.command, shell=True, stdout=PIPE,
@@ -22,7 +28,8 @@ class PopenWrapperClass(object):
 
     def __exit__(self, exc_type, exc_value, traceback):
         if hasattr(self.pop_, '__exit__'):
-            return self.pop_.__exit__(exc_type, exc_value, traceback)
+            return getattr(self.pop_, '__exit__')(exc_type, exc_value,
+                                                  traceback)
         self.pop_.wait()
         if exc_type or exc_value or traceback:
             return False
@@ -60,7 +67,6 @@ def run_remote_command(command, is_remote=False, sshclient=None):
 
 def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     ''' send string to specified socket '''
-    import socket
     net_type = socket.AF_INET
     stm_type = socket.SOCK_STREAM
     addr_obj = (host, portno)
@@ -69,19 +75,20 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
         addr_obj = socketfile
 
     retval = ''
-    s = socket.socket(net_type, stm_type)
+    sock_ = socket.socket(net_type, stm_type)
     try:
-        s.connect(addr_obj)
+        sock_.connect(addr_obj)
     except Exception:
         print('failed to open socket')
         return False
 
-    s.send('%s\n' % ostr)
-    retval = s.recv(1024)
-    s.close()
+    sock_.send('%s\n' % ostr)
+    retval = sock_.recv(1024)
+    sock_.close()
     return retval
 
 def convert_date(input_date):
+    ''' convert date string MM-DD-YYYY to date object '''
     import datetime
     _month = int(input_date[0:2])
     _day = int(input_date[2:4])
@@ -105,17 +112,18 @@ def print_m_s(second):
     else:
         return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
-def datetimestring(d):
+def datetimestring(date_):
     ''' input should be datetime object, output is string '''
-    if not hasattr(d, 'strftime'):
-        return d
-    s = d.strftime('%Y-%m-%dT%H:%M:%S%z')
-    if len(s) == 24 or len(s) == 20:
-        return s
-    elif len(s) == 19 and 'Z' not in s:
-        return '%sZ' % s
+    if not hasattr(date_, 'strftime'):
+        return date_
+    str_ = date_.strftime('%Y-%m-%dT%H:%M:%S%z')
+    if len(str_) == 24 or len(str_) == 20:
+        return str_
+    elif len(str_) == 19 and 'Z' not in str_:
+        return '%sZ' % str_
 
 def datetimefromstring(tstr, ignore_tz=False):
+    ''' parse datetime string '''
     import dateutil.parser
     #tstr = tstr.replace('-05:00', '-0500').replace('-04:00', '-0400')
     #print(tstr)
@@ -123,6 +131,7 @@ def datetimefromstring(tstr, ignore_tz=False):
 
 
 class OpenUnixSocketServer(object):
+    ''' wrapper around server socket for context manager '''
     def __init__(self, socketfile):
         self.sock = None
         self.socketfile = socketfile
@@ -135,17 +144,18 @@ class OpenUnixSocketServer(object):
         try:
             self.sock.bind(self.socketfile)
             os.chmod(self.socketfile, 0o777)
-        except:
+        except Exception as exc:
             time.sleep(10)
-            print('failed to open socket')
+            print('failed to open socket %s' % exc)
             return self.__enter__()
         print('open socket')
         self.sock.listen(0)
         return self.sock
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.sock.shutdown(socket.SHUT_RDWR)
-        self.sock.close()
+        if self.sock:
+            self.sock.shutdown(socket.SHUT_RDWR)
+            self.sock.close()
         if exc_type or exc_value or traceback:
             return False
         else:
@@ -153,15 +163,18 @@ class OpenUnixSocketServer(object):
 
 
 class OpenSocketConnection(object):
+    ''' wrapper around socket.accept for context manager '''
     def __init__(self, sock):
         self.sock = sock
+        self.conn = None
 
     def __enter__(self):
         self.conn, _ = self.sock.accept()
         return self.conn
 
     def __exit__(self, exc_type, exc_value, traceback):
-        self.conn.close()
+        if self.conn:
+            self.conn.close()
         if exc_type or exc_value or traceback:
             return False
         else:
