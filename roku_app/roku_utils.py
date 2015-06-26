@@ -74,8 +74,8 @@ def send_to_roku(arglist=None):
             retval = send_single_keypress(arg)
     return retval
 
-def make_audio_analysis_plots(infile, make_plots=True, do_fft=True,
-                              prefix='temp'):
+def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
+                              do_fft=True):
     import numpy as np
     from scipy import fftpack
     import matplotlib
@@ -119,6 +119,7 @@ def make_audio_analysis_plots(infile, make_plots=True, do_fft=True,
 
         run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/'
                     % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
+
     return float(np.sum(np.abs(sig_fft0)))
 
 def make_time_series_plot(input_file='', prefix='temp'):
