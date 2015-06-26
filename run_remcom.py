@@ -12,12 +12,12 @@ from roku_app.remcom_test import remcom_test_main
 
 if __name__ == '__main__':
     if len(os.sys.argv) > 4:
-        movie_filename = os.sys.argv[1]
-        output_dir = os.sys.argv[2]
-        _begin_time = int(os.sys.argv[3])
-        _end_time = int(os.sys.argv[4])
+        MOVIE_FILENAME = os.sys.argv[1]
+        OUTPUT_DIR = os.sys.argv[2]
+        BEGIN_TIME = int(os.sys.argv[3])
+        END_TIME = int(os.sys.argv[4])
     else:
         print('python remcom_test.py <file> <dir> <begin> <end>')
         exit(0)
 
-    remcom_test_main(movie_filename, output_dir, _begin_time, _end_time)
+    remcom_test_main(MOVIE_FILENAME, OUTPUT_DIR, BEGIN_TIME, END_TIME)
