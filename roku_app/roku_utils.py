@@ -1,5 +1,7 @@
 # -*- coding: utf-8 -*-
 """
+Utility Functions for RokuApp
+
 Created on Fri Jun 19 17:08:47 2015
 
 @author: ddboline
@@ -22,40 +24,44 @@ HOMEDIR = os.getenv('HOME')
 
 def send_single_keypress(keypress):
     ''' wrapper around curl '''
-    ROKU_IP = '192.168.0.101'
+    roku_ip = '192.168.0.101'
     if keypress == 'Wait':
         time.sleep(5)
     elif keypress == 'Gtalk':
         run_command('%s/bin/send_to_gtalk checkRoku' % HOMEDIR)
     else:
-        result = requests.post('http://%s:8060/keypress/%s' % (ROKU_IP, keypress))
+        result = requests.post('http://%s:8060/keypress/%s' % (roku_ip,
+                                                               keypress))
         if result.status_code != 200:
             return 'Error %d on keypress %s' % (result.status_code, keypress)
     return keypress
 
 def send_to_roku(arglist=None):
-    ''' main function, thumb and test run send message to record_roku, q quits, everything else sends to roku device '''
+    '''
+        main function, thumb and test run send message to record_roku,
+        q quits, everything else sends to roku device
+    '''
 
     retval = ''
 
     command_shortcuts = {'h': 'Home',
-                      'l': 'Left',
-                      'r': 'Right',
-                      's': 'Select',
-                      'f': 'Fwd',
-                      'b': 'Back',
-                      'u': 'Up',
-                      'd': 'Down',
-                      'p': 'Play',
-                      'w': 'Wait',
-                      'g': 'Gtalk',
-                      'rv': 'Rev',
-                      'ir': 'InstantReplay',
-                      'if': 'Info',
-                      'bs': 'Backspace',
-                      'sc': 'Search',
-                      'en': 'Enter',
-                      'as': 'Lit_*',}
+                         'l': 'Left',
+                         'r': 'Right',
+                         's': 'Select',
+                         'f': 'Fwd',
+                         'b': 'Back',
+                         'u': 'Up',
+                         'd': 'Down',
+                         'p': 'Play',
+                         'w': 'Wait',
+                         'g': 'Gtalk',
+                         'rv': 'Rev',
+                         'ir': 'InstantReplay',
+                         'if': 'Info',
+                         'bs': 'Backspace',
+                         'sc': 'Search',
+                         'en': 'Enter',
+                         'as': 'Lit_*',}
 
     if not arglist or len(arglist) == 0:
         return retval
@@ -77,6 +83,7 @@ def send_to_roku(arglist=None):
 
 def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
                               do_fft=True):
+    ''' create frequency plot '''
     import numpy as np
     from scipy import fftpack
     import matplotlib
@@ -88,9 +95,9 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
         rate, data = wavfile.read(infile)
     except ValueError:
         return -1
-    dt = 1./rate
-    T = dt * data.shape[0]
-    tvec = np.arange(0, T, dt)
+    dt_ = 1./rate
+    time_ = dt_ * data.shape[0]
+    tvec = np.arange(0, time_, dt_)
     sig0 = data[:, 0]
     sig1 = data[:, 1]
     if not do_fft:
@@ -103,9 +110,9 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
         pl.xticks(xtickarray, ['%d s' % x for x in xtickarray])
         pl.savefig('%s/%s_time.png' % (HOMEDIR, prefix))
         pl.clf()
-    samp_freq0 = fftpack.fftfreq(sig0.size, d=dt)
+    samp_freq0 = fftpack.fftfreq(sig0.size, d=dt_)
     sig_fft0 = fftpack.fft(sig0)
-    samp_freq1 = fftpack.fftfreq(sig1.size, d=dt)
+    samp_freq1 = fftpack.fftfreq(sig1.size, d=dt_)
     sig_fft1 = fftpack.fft(sig1)
     if make_plots:
         pl.clf()
@@ -125,12 +132,14 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
 
 def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
                               do_fft=True):
+    ''' wrapper around make_audio_analysis_plots '''
     tmp_ = Process(target=make_audio_analysis_plots,
                   args=(infile, prefix, make_plots, do_fft,))
     tmp_.start()
     tmp_.join()
 
 def make_time_series_plot(input_file='', prefix='temp'):
+    ''' create wav and time plot '''
     import numpy as np
     import matplotlib
     matplotlib.use('Agg')
@@ -138,8 +147,8 @@ def make_time_series_plot(input_file='', prefix='temp'):
 
     length_of_file = get_length_of_mpg(input_file)
     audio_vals = []
-    for t in range(0,length_of_file, 60):
-        run_command('mpv --start=%d ' % t +
+    for time_ in range(0, length_of_file, 60):
+        run_command('mpv --start=%d ' % time_ +
                     '--length=10 --ao=pcm:fast:file=%s/' % HOMEDIR +
                     '%s.wav --no-video ' % prefix +
                     '%s 2> /dev/null > /dev/null' % input_file)
@@ -147,10 +156,10 @@ def make_time_series_plot(input_file='', prefix='temp'):
                                             make_plots=False, do_fft=False)
         audio_vals.append(aud_int)
     #print(audio_vals)
-    x = np.arange(0, length_of_file, 60)
-    y = np.array(audio_vals)
+    x__ = np.arange(0, length_of_file, 60)
+    y__ = np.array(audio_vals)
     pl.clf()
-    pl.plot(x/60., y)
+    pl.plot(x__/60., y__)
     pl.savefig('%s/%s_time.png' % (HOMEDIR, prefix))
     pl.clf()
     run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix,
@@ -158,6 +167,7 @@ def make_time_series_plot(input_file='', prefix='temp'):
     return 'Done'
 
 def make_time_series_plot_wrapper(input_file='', prefix='temp'):
+    ''' wrapper around make_time_series_plot '''
     tmp_ = Process(target=make_time_series_plot, args=(input_file, prefix,))
     tmp_.start()
     tmp_.join()
@@ -168,9 +178,9 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
     if not os.path.exists(fname):
         return -1
     command = 'avconv -i %s 2>&1' % fname
-    _cmd = Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
+    cmd_ = Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
     nsecs = 0
-    for line in _cmd.readlines():
+    for line in cmd_.readlines():
         _line = line.split()
         if _line[0] == 'Duration:':
             items = _line[1].strip(',').split(':')
@@ -182,41 +192,40 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
                 nsecs = -1
     return nsecs
 
-def get_random_hex_string(n):
+def get_random_hex_string(nbytes):
     ''' use os.urandom to create n byte random string, output integer '''
     from binascii import b2a_hex
-    return int(b2a_hex(os.urandom(n)), 16)
+    return int(b2a_hex(os.urandom(nbytes)), 16)
 
 def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
                     output_dir='%s/public_html/videos/thumbnails' % HOMEDIR,
                     use_mplayer=True):
     ''' write out thumbnail images from running recording at specified time '''
-    TMPDIR = '%s_%06x' % (output_dir, get_random_hex_string(3))
+    tmpdir = '%s_%06x' % (output_dir, get_random_hex_string(3))
 
     if input_file == '':
         input_file = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
     if not os.path.exists(input_file):
-        run_command('rm -rf %s' % TMPDIR)
+        run_command('rm -rf %s' % tmpdir)
         return -1
     run_command('mkdir -p %s' % output_dir)
     if use_mplayer:
-        run_command('mplayer -ao null -vo jpeg:outdir=%s ' % TMPDIR +
+        run_command('mplayer -ao null -vo jpeg:outdir=%s ' % tmpdir +
                     '-frames 10 -ss %s ' % begin_time +
                     '%s 2> /dev/null > /dev/null' % input_file)
     else:
-        run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s ' % TMPDIR +
+        run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s ' % tmpdir +
                     '--frames=10 --start=%s ' % begin_time +
                     '%s 2> /dev/null > /dev/null' % input_file)
-    run_command('mv %s/* %s/ 2> /dev/null > /dev/null' % (TMPDIR, output_dir))
-    run_command('rm -rf %s' % TMPDIR)
+    run_command('mv %s/* %s/ 2> /dev/null > /dev/null' % (tmpdir, output_dir))
+    run_command('rm -rf %s' % tmpdir)
     return begin_time
 
 def write_single_line_to_file(fname, line, turn_on_commands=True):
     ''' convenience function, write single line to file then exit  '''
     if turn_on_commands:
-        f = open(fname, 'a')
-        f.write(line)
-        f.close()
+        with open(fname, 'a') as file_:
+            file_.write(line)
     else:
         print('write %s to %s' % (line, fname))
 
@@ -226,7 +235,6 @@ def run_fix_pvr(unload_module=True):
         fix permissions in /sys/class/pvrusb2
         hope the kernel doesn't ooops
     '''
-    import time
     from .get_dev import is_module_loaded
     if unload_module:
         run_command('sudo modprobe -r pvrusb2')
@@ -244,25 +252,27 @@ def run_fix_pvr(unload_module=True):
 
     sdir = '/sys/class/pvrusb2/sn-5370885'
 
-    for fn, l in [['ctl_video_standard_mask_active/cur_val', 'NTSC-M'],
-                   ['ctl_input/cur_val', 'composite'],
-                   ['ctl_video_bitrate_mode/cur_val', 'Constant Bitrate'],
-                   ['ctl_video_bitrate/cur_val', '4000000'],
-                   ['ctl_volume/cur_val', '57000']]:
-        write_single_line_to_file('%s/%s' % (sdir, fn), l)
+    for fn_, l__ in [['ctl_video_standard_mask_active/cur_val', 'NTSC-M'],
+                     ['ctl_input/cur_val', 'composite'],
+                     ['ctl_video_bitrate_mode/cur_val', 'Constant Bitrate'],
+                     ['ctl_video_bitrate/cur_val', '4000000'],
+                     ['ctl_volume/cur_val', '57000']]:
+        write_single_line_to_file('%s/%s' % (sdir, fn_), l__)
 
     return
 
 def check_dmesg_for_ooops():
+    ''' check for ooops in dmesg output '''
     oops_messages = ['BUG: unable to handle kernel paging request at',
                      'general protection fault',]
-    _cmd = Popen('dmesg', shell=True, stdout=PIPE, close_fds=True).stdout
-    for l in _cmd.readlines():
-        if any(mes in l for mes in oops_messages):
+    cmd_ = Popen('dmesg', shell=True, stdout=PIPE, close_fds=True).stdout
+    for line in cmd_.readlines():
+        if any(mes in line for mes in oops_messages):
             return True
     return False
 
 def play_roku():
+    ''' play roku '''
     import shlex
     from .get_dev import get_dev
     device = '/dev/video0'
@@ -272,19 +282,18 @@ def play_roku():
     device = get_dev('pvrusb')
     run_fix_pvr(unload_module=False)
 
-    XCROP, YCROP, XOFF, YOFF = 704, 470, 14, 8
+    xcrop, ycrop, xoff, yoff = 704, 470, 14, 8
 
-    _cmd = 'mplayer %s -nosound ' % device + \
-           '-vf crop=%d:%d:%d:%d' % (XCROP, YCROP, XOFF, YOFF) + \
+    cmd_ = 'mplayer %s -nosound ' % device + \
+           '-vf crop=%d:%d:%d:%d' % (xcrop, ycrop, xoff, yoff) + \
            ',dsize=470:-2 -softvol-max 1000'
 
-    args = shlex.split(_cmd)
+    args = shlex.split(cmd_)
     recording_process = Popen(args, shell=False)
 
     killscript = '%s/netflix/kill_job.sh' % HOMEDIR
 
-    f = open(killscript, 'w')
-    f.write('kill -9 %d %d\n' % (recording_process.pid, os.getpid()))
-    f.close()
+    with open(killscript, 'w') as file_:
+        file_.write('kill -9 %d %d\n' % (recording_process.pid, os.getpid()))
 
     recording_process.wait()
