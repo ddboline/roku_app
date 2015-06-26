@@ -14,7 +14,8 @@ import logging
 
 from .get_dev import get_dev
 from .send_to_roku import send_to_roku
-from .roku_utils import (make_audio_analysis_plots, make_time_series_plot,
+from .roku_utils import (make_audio_analysis_plots_wrapper, 
+                         make_time_series_plot_wrapper,
                          run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg,
                          make_thumbnails)
 from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection, )
@@ -128,10 +129,7 @@ def make_test_video(prefix='test_roku', begin_time=0,
     
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
-    tmp_ = Process(target=make_audio_analysis_plots,
-                   args=('%s/test.wav' % HOMEDIR, 'test',))
-    tmp_.start()
-    tmp_.join()
+    make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR, prefix='test')
 
 
 def make_transcode_script(prefix='test_roku',
@@ -246,8 +244,8 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                                         (int(_ta), _ts, int(_ts)/60)
                     elif _cmd == 'time':
                         if os.path.exists(fname):
-                            outstring = make_time_series_plot(fname,
-                                                              prefix='test')
+                            outstring = make_time_series_plot_wrapper(
+                                            fname, prefix='test')
                     else:
                         outstring = send_to_roku([_cmd])
                         print(outstring)
