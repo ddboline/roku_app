@@ -1,4 +1,5 @@
 #!/usr/bin/python
+''' remcom test module '''
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -24,17 +25,17 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
         cut and splice recorded file to remove undesired sections
         (commercials), use temp not test here...
     '''
-    INPUT_STRING = '%d,%d' % (begin_time, end_time)
+    input_string = '%d,%d' % (begin_time, end_time)
     remove_commercials(input_file, '%s/%s' % (output_dir,
                                               input_file.split('/')[-1]),
-                       TIMING_STRING=INPUT_STRING)
+                       timing_string=input_string)
     return 0
 
 def make_test_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
-    INPUT_STRING = '%d,%d' % (begin_time, begin_time+10)
-    remove_commercials(INFILE=input_file, OUTFILE='%s/temp.avi' % HOMEDIR,
-                       TIMING_STRING=INPUT_STRING)
+    input_string = '%d,%d' % (begin_time, begin_time+10)
+    remove_commercials(infile=input_file, outfile='%s/temp.avi' % HOMEDIR,
+                       timing_string=input_string)
     run_command('time HandBrakeCLI -i %s/temp.avi -f mp4 -e x264 ' % HOMEDIR +
                 '-b 600 -o %s/temp.mp4 > /dev/null 2>&1\n' % HOMEDIR)
     run_command('mpv --ao=pcm:fast:file=%s/temp.wav --no-video ' % HOMEDIR +
@@ -122,14 +123,15 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
     return 0
 
 def keyboard_input():
-    i, o, e = select([os.sys.stdin], [], [], 0.0001)
-    for s in i:
-        if s == os.sys.stdin:
+    ''' keyboard input from stdin using select function '''
+    in_, _, _ = select([os.sys.stdin], [], [], 0.0001)
+    for s__ in in_:
+        if s__ == os.sys.stdin:
             return os.sys.stdin.readline()
     return None
 
 def remcom_test_main(movie_filename, output_dir, begin_time, end_time):
-
+    ''' main recom_test function '''
     msg_q = multiprocessing.Queue()
 
     net = multiprocessing.Process(target=remcom_test,
