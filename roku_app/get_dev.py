@@ -1,4 +1,5 @@
 #!/usr/bin/python
+''' get_dev module '''
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
@@ -39,9 +40,9 @@ def get_dev(user_mod=''):
                     return devname
 
 if __name__ == '__main__':
-    user_module = ''
+    USER_MODULE = ''
 
     if len(os.sys.argv) > 1:
-        user_module = os.sys.argv[1]
+        USER_MODULE = os.sys.argv[1]
 
-    print(get_dev(user_module))
+    print(get_dev(USER_MODULE))
