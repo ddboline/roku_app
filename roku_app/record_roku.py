@@ -309,12 +309,12 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
         _cmd = 'mplayer %s -dumpstream -dumpfile %s 2>&' % (device, fname)
     else:
         _cmd = 'mpv %s --stream-dump=%s 2>&' % (device, fname)
-    logging.info('%s\n' % _cmd)
+    logging.info('%s\n', _cmd)
     args = shlex.split(_cmd)
 
     recording_process = Popen(args, shell=False)
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
-    logging.info('recording pid: %s\n' % recording_process.pid)
+    logging.info('recording pid: %s\n', recording_process.pid)
 
     monitoring = Process(target=monitoring_thread,
                                          args=(prefix, msg_q, cmd_q,))
@@ -377,20 +377,20 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
     device = get_dev('pvrusb')
 
-    logging.info('recording %s for %d seconds\n' % (recording_name,
-                                                     recording_time))
+    logging.info('recording %s for %d seconds\n', recording_name,
+                 recording_time)
 
     ### This needs to run before the server_thread is started
     if recording_name != 'test_roku':
         kill_running_recordings()
         pids = list_running_recordings(device)
         kill_running_recordings(pids)
-        logging.info('killing %s \n' % pids)
+        logging.info('killing %s \n', pids)
     else:
         pids = list_running_recordings(device)
         if len(pids) > 0:
             print('already recording %s\n' % pids)
-            logging.error('already recording %s\n' % pids)
+            logging.error('already recording %s\n', pids)
             exit(0)
 
     msg_q = Queue()
