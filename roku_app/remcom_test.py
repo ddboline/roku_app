@@ -10,8 +10,8 @@ from select import select
 import multiprocessing
 
 from .remove_commercials import remove_commercials
-from .roku_utils import (make_thumbnails, make_audio_analysis_plots,
-                         make_time_series_plot,)
+from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
+                         make_time_series_plot_wrapper,)
 from .util import (run_command, send_command,
                    OpenUnixSocketServer, OpenSocketConnection)
 
@@ -42,7 +42,8 @@ def make_test_script(input_file='', begin_time=0):
     run_command('mv %s/temp.mp4 %s/public_html/videos/temp.mp4\n'
                 % (HOMEDIR, HOMEDIR))
     os.remove('%s/temp.avi' % HOMEDIR)
-    return make_audio_analysis_plots('%s/temp.wav' % HOMEDIR, prefix='temp')
+    return make_audio_analysis_plots_wrapper('%s/temp.wav' % HOMEDIR,
+                                             prefix='temp')
 
 
 def remcom_test(movie_filename, output_dir, begin_time, end_time,
@@ -95,7 +96,8 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
                             '%s' % make_test_script(movie_filename,
                                                     begin_time=end_time))
                     elif option == 't':
-                        outstring.append(make_time_series_plot(movie_filename))
+                        outstring.append(
+                            make_time_series_plot_wrapper(movie_filename))
                     else:
                         try:
                             end_time = int(option) * 60
@@ -108,9 +110,9 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
                                      '/'.join(output_dir.split('/')[-2:]),
                                      begin_time, end_time))
                 tmp_begin = make_thumbnails(
-                                input_file=movie_filename, begin_time=end_time,
-                                output_dir='%s/public_html/videos/thumbnails_tv'
-                                           % HOMEDIR)
+                            input_file=movie_filename, begin_time=end_time,
+                            output_dir='%s/public_html/videos/thumbnails_tv'
+                                       % HOMEDIR)
                 outstring.append('%d, s/f/b/q/t:' % (tmp_begin / 60))
                 conn.send('\n'.join(outstring))
 
