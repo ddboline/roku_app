@@ -21,9 +21,10 @@ from subprocess import Popen, PIPE
 from .util import run_command, send_command
 
 HOMEDIR = os.getenv('HOME')
+USER = os.getenv('USER')
 
 def send_single_keypress(keypress):
-    ''' wrapper around curl '''
+    ''' wrapper around requests.post '''
     roku_ip = '192.168.0.101'
     if keypress == 'Wait':
         time.sleep(5)
@@ -254,9 +255,9 @@ def run_fix_pvr(unload_module=True):
         time.sleep(20)
         while not is_module_loaded('pvrusb2'):
             time.sleep(10)
-    run_command(
-        'sudo chown -R ddboline:ddboline /sys/class/pvrusb2/sn-5370885/')
-    run_command('sudo chown ddboline:ddboline ' +
+    run_command('sudo chown -R %s:%s ' % (USER, USER) +
+                '/sys/class/pvrusb2/sn-5370885/')
+    run_command('sudo chown %s:%s ' % (USER, USER) +
                 '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor')
 
     sdir = '/sys/class/pvrusb2/sn-5370885'
