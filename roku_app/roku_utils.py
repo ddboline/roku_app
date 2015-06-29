@@ -15,7 +15,7 @@ import os
 import time
 import requests
 
-from multiprocessing import Process
+from multiprocessing import Process, Value
 from subprocess import Popen, PIPE
 
 from .util import run_command, send_command
@@ -82,7 +82,7 @@ def send_to_roku(arglist=None):
     return retval
 
 def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
-                              do_fft=True, fft_sum=-1):
+                              do_fft=True, fft_sum=None):
     ''' create frequency plot '''
     import numpy as np
     from scipy import fftpack
@@ -94,6 +94,7 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     try:
         rate, data = wavfile.read(infile)
     except ValueError:
+        print('error reading wav file')
         return -1
     dt_ = 1./rate
     time_ = dt_ * data.shape[0]
@@ -101,7 +102,10 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     sig0 = data[:, 0]
     sig1 = data[:, 1]
     if not do_fft:
-        return float(np.sum(np.abs(sig0)))
+        fft_sum_ = float(np.sum(np.abs(sig0)))
+        if hasattr(fft_sum, 'value'):
+            fft_sum.value = fft_sum_
+        return fft_sum_
     if make_plots:
         pl.clf()
         pl.plot(tvec, sig0)
@@ -128,18 +132,20 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
         run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/'
                     % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
 
-    fft_sum = float(np.sum(np.abs(sig_fft0)))
-    return fft_sum
+    fft_sum_ = float(np.sum(np.abs(sig_fft0)))
+    if hasattr(fft_sum, 'value'):
+        fft_sum.value = fft_sum_
+    return fft_sum_
 
 def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
                               do_fft=True):
     ''' wrapper around make_audio_analysis_plots '''
-    fft_sum=-1
+    fft_sum = Value('d')
     tmp_ = Process(target=make_audio_analysis_plots,
                   args=(infile, prefix, make_plots, do_fft, fft_sum,))
     tmp_.start()
     tmp_.join()
-    return fft_sum
+    return fft_sum.value
 
 def make_time_series_plot(input_file='', prefix='temp'):
     ''' create wav and time plot '''
