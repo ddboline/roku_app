@@ -82,7 +82,7 @@ def send_to_roku(arglist=None):
     return retval
 
 def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
-                              do_fft=True):
+                              do_fft=True, fft_sum=-1):
     ''' create frequency plot '''
     import numpy as np
     from scipy import fftpack
@@ -128,15 +128,18 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
         run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/'
                     % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
 
-    return float(np.sum(np.abs(sig_fft0)))
+    fft_sum = float(np.sum(np.abs(sig_fft0)))
+    return fft_sum
 
 def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
                               do_fft=True):
     ''' wrapper around make_audio_analysis_plots '''
+    fft_sum=-1
     tmp_ = Process(target=make_audio_analysis_plots,
-                  args=(infile, prefix, make_plots, do_fft,))
+                  args=(infile, prefix, make_plots, do_fft, fft_sum,))
     tmp_.start()
     tmp_.join()
+    return fft_sum
 
 def make_time_series_plot(input_file='', prefix='temp'):
     ''' create wav and time plot '''

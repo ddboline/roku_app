@@ -129,7 +129,7 @@ def make_test_video(prefix='test_roku', begin_time=0,
 
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
-    make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR, prefix='test')
+    return make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR, prefix='test')
 
 
 def make_transcode_script(prefix='test_roku',
@@ -259,15 +259,15 @@ def make_test_file(prefix='test_roku'):
     ''' write thumbnail and test-script at current time '''
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
 
-    _time = get_length_of_mpg(fname)
+    time_ = get_length_of_mpg(fname)
 
-    _st = -1
-    if _time > 0:
-        make_thumbnails(prefix, begin_time=_time-1)
+    st_ = -1
+    if time_ > 0:
+        make_thumbnails(prefix, begin_time=time_-1)
 
-        make_test_video(prefix, _time-10)
+        st_ = make_test_video(prefix, time_-10)
 
-    return _time, _st
+    return time_, st_
 
 
 def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
