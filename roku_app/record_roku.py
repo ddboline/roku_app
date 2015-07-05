@@ -118,7 +118,7 @@ def make_test_video(prefix='test_roku', begin_time=0,
                 '-lavcopts vcodec=mpeg4:vbitrate=600:threads=2 ' + \
                 '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
                 '> ~/netflix/log/test.out 2>&1 && ' + \
-                'mpv --ao=pcm:fast:file=%s/test.wav ' % HOMEDIR + \
+                'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
                 '--no-video ~/test.avi > /dev/null 2>&1 && ' + \
                 'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
                 '-b 600 -o ~/test.mp4 >> ' + \

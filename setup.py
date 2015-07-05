@@ -24,5 +24,5 @@ setup(
     packages=['roku_app'],
     package_dir={'roku_app': 'roku_app'},
     package_data={'roku_app': ['roku_app/templates/*.html']},
-    scripts=['garmin.py']
+    scripts=['run_recording.py']
 )

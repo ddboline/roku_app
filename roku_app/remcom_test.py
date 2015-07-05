@@ -38,7 +38,7 @@ def make_test_script(input_file='', begin_time=0):
                        timing_string=input_string)
     run_command('time HandBrakeCLI -i %s/temp.avi -f mp4 -e x264 ' % HOMEDIR +
                 '-b 600 -o %s/temp.mp4 > /dev/null 2>&1\n' % HOMEDIR)
-    run_command('mpv --ao=pcm:fast:file=%s/temp.wav --no-video ' % HOMEDIR +
+    run_command('mpv --ao=pcm:file=%s/temp.wav --no-video ' % HOMEDIR +
                 '%s/temp.avi > /dev/null 2>&1\n' % HOMEDIR)
     run_command('mv %s/temp.mp4 %s/public_html/videos/temp.mp4\n'
                 % (HOMEDIR, HOMEDIR))
