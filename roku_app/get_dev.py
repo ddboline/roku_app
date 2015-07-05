@@ -6,7 +6,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-from .util import run_command
+try:
+    from .util import run_command
+except (ValueError, SystemError):
+    from util import run_command
 
 def is_module_loaded(user_mod='pvrusb2'):
     ''' has module been loaded? '''
@@ -26,6 +29,8 @@ def get_dev(user_mod=''):
     with run_command('ls /dev/video*', do_popen=True) as pop_:
         for line in pop_:
             devname = line.strip()
+            if hasattr(devname, 'decode'):
+                devname = devname.decode()
 
             if not os.path.exists('/usr/bin/v4l-info'):
                 print('YOU NEED TO INSTALL v4l-conf')
@@ -34,6 +39,8 @@ def get_dev(user_mod=''):
             with run_command('v4l-info %s 2> /dev/null | grep driver'
                              % devname, do_popen=True) as v4linfo:
                 for line in v4linfo:
+                    if hasattr(line, 'decode'):
+                        line = line.decode()
                     if line != '':
                         driver = line.split()[2].strip('"')
                 if user_mod in driver or (not user_mod and driver == 'em28xx'):
