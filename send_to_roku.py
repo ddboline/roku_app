@@ -20,7 +20,8 @@ if __name__ == '__main__':
     USER = 'ddboline'
 
     if HOSTNAME != 'dilepton-tower':
-        CMD = 'python %s/scripts/send_to_roku.py' % HOMEDIR
+        SCRIPT_DIR = '%s/setup_files/build/roku_app/' % HOMEDIR
+        CMD = 'python %s/send_to_roku.py' % SCRIPT_DIR
         for arg in os.sys.argv[1:]:
             CMD = '%s %s' % (CMD, arg)
         run_command('ssh %s@%s \"%s\"' % (USER, REMOTEHOST, CMD))
