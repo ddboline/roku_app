@@ -82,7 +82,7 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
         print('failed to open socket')
         return False
 
-    sock_.send('%s\n' % ostr)
+    sock_.send(b'%s\n' % ostr)
     retval = sock_.recv(1024)
     sock_.close()
     return retval

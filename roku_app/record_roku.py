@@ -175,7 +175,8 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
             cmd_queue = []
             with OpenSocketConnection(sock) as conn:
                 for arg in conn.recv(1024).split():
-
+                    if hasattr(arg, 'decode'):
+                        arg = arg.decode()
                     if arg == 'q':
                         ### quit command: kill everything
                         if os.path.exists(KILLSCRIPT):
@@ -203,6 +204,8 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                     outstring = last_output_message
                 logging.info(outstring)
                 try:
+                    if hasattr(outstring, 'encode'):
+                        outstring = outstring.encode()
                     conn.send(outstring)
                 except socket.error:
                     time.sleep(10)

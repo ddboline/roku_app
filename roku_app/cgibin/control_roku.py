@@ -49,7 +49,7 @@ def send_command(ostr, host='localhost', portno=10888,
     with OpenUnixSocketClient(host, portno, socketfile) as sock:
         if not sock:
             return 'Failed to open socket'
-        sock.send('%s\n' % ostr)
+        sock.send(b'%s\n' % ostr)
         retval = sock.recv(1024)
         return retval
 

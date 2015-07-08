@@ -65,7 +65,10 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
         while True:
             outstring = []
             with OpenSocketConnection(sock) as conn:
-                args = conn.recv(1024).split()
+                args = conn.recv(1024)
+                if hasattr(args, 'decode'):
+                    args = args.decode()
+                args = args.split()
 
                 original_end_time = end_time
 
@@ -73,7 +76,7 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
 
                 for option in args:
                     if option == 'q':
-                        conn.send('q')
+                        conn.send(b'q')
                         msg_q.put('q')
                         return 0
                     elif option[0] == 'f':
@@ -89,7 +92,7 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
                     elif option == 's':
                         remove_commercials_wrapper(movie_filename, output_dir,
                                                    begin_time, end_time)
-                        conn.send('done')
+                        conn.send(b'done')
                         msg_q.put('q')
                         return 0
                     elif option == 'v':
@@ -115,7 +118,10 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
                             output_dir='%s/public_html/videos/thumbnails_tv'
                                        % HOMEDIR)
                 outstring.append('%d, s/f/b/q/t:' % (tmp_begin / 60))
-                conn.send('\n'.join(outstring))
+                outstring = '\n'.join(outstring)
+                if hasattr(outstring, 'encode'):
+                    outstring = outstring.encode()
+                conn.send(outstring)
 
         if original_end_time > end_time:
             print('original %s new %s args %s' % (original_end_time, end_time,

@@ -191,6 +191,8 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
     cmd_ = Popen(command, shell=True, stdout=PIPE, close_fds=True).stdout
     nsecs = 0
     for line in cmd_.readlines():
+        if hasattr(line, 'decode'):
+            line = line.decode()
         _line = line.split()
         if _line[0] == 'Duration:':
             items = _line[1].strip(',').split(':')
@@ -277,6 +279,8 @@ def check_dmesg_for_ooops():
                      'general protection fault',]
     cmd_ = Popen('dmesg', shell=True, stdout=PIPE, close_fds=True).stdout
     for line in cmd_.readlines():
+        if hasattr(line, 'decode'):
+            line = line.decode()
         if any(mes in line for mes in oops_messages):
             return True
     return False
