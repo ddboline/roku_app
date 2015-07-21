@@ -72,8 +72,6 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
 
                 original_end_time = end_time
 
-                print(args)
-
                 for option in args:
                     if option == 'q':
                         conn.send(b'q')
