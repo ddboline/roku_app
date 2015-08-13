@@ -25,9 +25,10 @@ your browser does not support the video tag
 <button type="submit" onclick="processTestRunData();"> Video </button>
 <button type="submit" onclick="processButtonDataNonThumb('time');"> TimeSeries </button>
 <button type="submit" onclick="updateImageRoku();updateVideoRoku();send_command_roku('output');"> Update </button>
-<form action="../../cgi-bin/control_roku.py" method="get">
+<form id="roku_form">
 <input type="text" name="cmd" id="roku_cmd"/>
-<input type="button" name="submitROKU" value="Submit" onclick="processFormData();"/>
+<button type="submit" name="submitROKU" onclick="processFormData();"> Submit </button>
+<button name="rokureset" id="rokureset" onclick="resetRokuForm();"> Reset </button>
 <button name="rokuinp" id="rokuinput"> &nbsp; </button>
 <button name="rokuout" id="rokuoutput"> &nbsp; </button>
 </form>
@@ -64,9 +65,10 @@ your browser does not support the video tag
 <button type="submit" onclick="processButtonDataV('v');"> Video </button>
 <button type="submit" onclick="processButtonData2('t');"> TimeSeries </button>
 <button type="submit" onclick="updateImageRemcom();updateVideoRemcom();"> Update </button>
-<form action="../../cgi-bin/control_remcom.py" method="get">
+<form id="remcom_form">
 <input type="text" name="cmd" id="remcom_cmd"/>
 <input type="button" name="submitREMCOM" value="Submit" onclick="processFormData2();"/>
+<button name="remcomreset" id="remcomreset" onclick="resetRemCom();"> Reset </button>
 <button name="remcominp" id="remcominput"> &nbsp; </button>
 <button name="remcomout" id="remcomoutput"> &nbsp; </button>
 </form>
@@ -126,7 +128,6 @@ your browser does not support the video tag
     // change input, print output
     function processButtonDataWait( value ) {
         document.getElementById("rokuinput").innerHTML = value;
-        document.getElementById("rokuoutput").innerHTML = 'waiting';
         send_command_roku( value );
         setTimeout("send_command_roku('output');", 5*1000);
         setTimeout("updateImageRoku();", 5*1000);
@@ -140,9 +141,11 @@ your browser does not support the video tag
         var roku_cmd = document.getElementById( 'roku_cmd' );
         processButtonDataNonThumb( roku_cmd.value );
     }
+    function resetRokuForm(){
+        document.getElementById( 'rokureset' ).reset();
+    }
     function processTestRunData() {
         document.getElementById("rokuinput").innerHTML = "test run";
-        document.getElementById("rokuoutput").innerHTML = "waiting";
         send_command_roku( 'test');
         setTimeout("updateImageRoku();",5*1000);
         setTimeout("updateVideoRoku();",5*1000);
@@ -157,7 +160,6 @@ your browser does not support the video tag
             updateImageRemcom();
         }
         document.getElementById("remcominput").innerHTML = value;
-        document.getElementById("remcomoutput").innerHTML = "waiting";
         xmlhttp.send(null);
     }
     function processButtonDataV( value ) {
@@ -170,12 +172,14 @@ your browser does not support the video tag
             updateImageRemcom();
         }
         document.getElementById("remcominput").innerHTML = value;
-        document.getElementById("remcomoutput").innerHTML = "waiting";
         xmlhttp.send(null);
     }
     function processFormData2() {
         var remcom_cmd = document.getElementById( 'remcom_cmd' );
         processButtonData2( remcom_cmd.value );
+    }
+    function resetRemCom() {
+        document.getElementById( 'remcom_form' ).reset();
     }
 </script>
 

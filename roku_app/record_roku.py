@@ -264,7 +264,7 @@ def make_thumb_script(prefix='test_roku'):
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
 
     if not os.path.exists(fname):
-        return fname
+        return -1, -1
 
     time_ = get_length_of_mpg(fname)
 

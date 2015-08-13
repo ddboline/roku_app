@@ -17,7 +17,7 @@ class OpenUnixSocketClient(object):
         self.portno = portno
         if socketfile:
             self.socketfile = socketfile
-    
+
     def __enter__(self):
         stm_type = socket.SOCK_STREAM
         if self.socketfile:

@@ -31,7 +31,7 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
                        timing_string=input_string)
     return 0
 
-def make_test_script(input_file='', begin_time=0):
+def make_video_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
     input_string = '%d,%d' % (begin_time, begin_time+10)
     remove_commercials(infile=input_file, outfile='%s/temp.avi' % HOMEDIR,
@@ -95,7 +95,7 @@ def remcom_test(movie_filename, output_dir, begin_time, end_time,
                         return 0
                     elif option == 'v':
                         outstring.append(
-                            '%s' % make_test_script(movie_filename,
+                            '%s' % make_video_script(movie_filename,
                                                     begin_time=end_time))
                     elif option == 't':
                         outstring.append(
