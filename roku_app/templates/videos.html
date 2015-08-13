@@ -25,13 +25,12 @@ your browser does not support the video tag
 <button type="submit" onclick="processTestRunData();"> Video </button>
 <button type="submit" onclick="processButtonDataNonThumb('time');"> TimeSeries </button>
 <button type="submit" onclick="updateImageRoku();updateVideoRoku();send_command_roku('output');"> Update </button>
-<form id="roku_form">
+<br><br>
 <input type="text" name="cmd" id="roku_cmd"/>
 <button type="submit" name="submitROKU" onclick="processFormData();"> Submit </button>
-<button name="rokureset" id="rokureset" onclick="resetRokuForm();"> Reset </button>
+<button type="submit" id="rokureset" onclick="resetRokuForm();"> Reset </button>
 <button name="rokuinp" id="rokuinput"> &nbsp; </button>
 <button name="rokuout" id="rokuoutput"> &nbsp; </button>
-</form>
 </p>
 
 <p>
@@ -61,17 +60,16 @@ your browser does not support the video tag
 <button type="submit" onclick="processButtonData2('f5');"> t+=5min </button>
 <button type="submit" onclick="processButtonData2('b1');"> t-=1min </button>
 <button type="submit" onclick="processButtonData2('f1');"> t+=1min </button>
-<button type="submit" onclick="processButtonData2('s');"> Select </button>
 <button type="submit" onclick="processButtonDataV('v');"> Video </button>
+<button type="submit" onclick="processButtonData2('s');"> Select </button>
 <button type="submit" onclick="processButtonData2('t');"> TimeSeries </button>
 <button type="submit" onclick="updateImageRemcom();updateVideoRemcom();"> Update </button>
-<form id="remcom_form">
+<br><br>
 <input type="text" name="cmd" id="remcom_cmd"/>
-<input type="button" name="submitREMCOM" value="Submit" onclick="processFormData2();"/>
-<button name="remcomreset" id="remcomreset" onclick="resetRemCom();"> Reset </button>
+<button type="submit" name="submitREMCOM" onclick="processFormData2();"> Submit </button>
+<button type="submit" id="remcomreset" onclick="resetRemCom();"> Reset </button>
 <button name="remcominp" id="remcominput"> &nbsp; </button>
 <button name="remcomout" id="remcomoutput"> &nbsp; </button>
-</form>
 </p>
 
 <p>
@@ -138,11 +136,11 @@ your browser does not support the video tag
         setTimeout("send_command_roku('thumb');",5*1000);
     }
     function processFormData() {
-        var roku_cmd = document.getElementById( 'roku_cmd' );
-        processButtonDataNonThumb( roku_cmd.value );
+        var roku_cmd = document.getElementById( 'roku_cmd' ).value;
+        processButtonDataNonThumb( roku_cmd );
     }
-    function resetRokuForm(){
-        document.getElementById( 'rokureset' ).reset();
+    function resetRokuForm() {
+        document.getElementById( 'roku_cmd' ).value = "";
     }
     function processTestRunData() {
         document.getElementById("rokuinput").innerHTML = "test run";
@@ -179,7 +177,7 @@ your browser does not support the video tag
         processButtonData2( remcom_cmd.value );
     }
     function resetRemCom() {
-        document.getElementById( 'remcom_form' ).reset();
+        document.getElementById( 'remcom_form' ).value = "";
     }
 </script>
 
