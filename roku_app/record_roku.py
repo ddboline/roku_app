@@ -100,7 +100,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
     return
 
-def make_test_video(prefix='test_roku', begin_time=0,
+def make_video(prefix='test_roku', begin_time=0,
                     use_handbrake_for_test_script=False):
     ''' write video file, then run audio analysis on it '''
     if use_handbrake_for_test_script:
@@ -122,13 +122,15 @@ def make_test_video(prefix='test_roku', begin_time=0,
                 'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
                 '-b 600 -o ~/test.mp4 >> ' + \
                 '~/netflix/log/test.out 2>&1'
+
     run_command(cmd_)
 
     run_command('mv ~/test.mp4 ~/public_html/videos/')
 
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
-    return make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR, prefix='test')
+    return make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR,
+                                             prefix='test')
 
 
 def make_transcode_script(prefix='test_roku',
@@ -241,7 +243,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                                 outstring = 'ERROR: NO FILE FOUND %s' % prefix
                     elif _cmd == 'test':
                         if os.path.exists(fname):
-                            _ts, _ta = make_test_file(prefix)
+                            _ts, _ta = make_thumb_script(prefix)
                             outstring = '%d get test movie at t=%d %d' %\
                                         (int(_ta), _ts, int(_ts)/60)
                     elif _cmd == 'time':
@@ -257,9 +259,12 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
         time.sleep(1)
 
 
-def make_test_file(prefix='test_roku'):
+def make_thumb_script(prefix='test_roku'):
     ''' write thumbnail and test-script at current time '''
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
+
+    if not os.path.exists(fname):
+        return fname
 
     time_ = get_length_of_mpg(fname)
 
@@ -267,7 +272,7 @@ def make_test_file(prefix='test_roku'):
     if time_ > 0:
         make_thumbnails(prefix, begin_time=time_-1)
 
-        st_ = make_test_video(prefix, time_-10)
+        st_ = make_video(prefix, time_-10)
 
     return time_, st_
 
@@ -292,9 +297,9 @@ def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
         time.sleep(sleep_time)
         total_time += sleep_time
         if total_time == 60 or total_time == 300:
-            make_test_file(prefix)
+            make_thumb_script(prefix)
         else:
-            make_test_file(prefix)
+            make_thumb_script(prefix)
         if total_time == 300 and prefix != 'test_roku':
             if msg_q:
                 msg_q.put('check_now')
@@ -343,7 +348,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
 
     time.sleep(5)
 
-    make_test_file(prefix)
+    make_thumb_script(prefix)
 
     make_transcode_script(prefix)
 
@@ -358,7 +363,7 @@ def signal_finish(prefix='test_roku'):
         with open(KILLSCRIPT, 'a') as outfile:
             outfile.write('\n mv %s/netflix/tmp/%s.sh ' % (HOMEDIR, prefix))
             outfile.write('%s/netflix/jobs/\n' % HOMEDIR)
-    _, _ta = make_test_file(prefix)
+    _, _ta = make_thumb_script(prefix)
     run_command('send_to_gtalk \"%s is done %d\"' % (prefix, int(_ta)))
     return
 
