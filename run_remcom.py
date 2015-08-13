@@ -8,7 +8,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-from roku_app.remcom_test import remcom_test_main
+from roku_app.remcom import remcom_main
 
 if __name__ == '__main__':
     if len(os.sys.argv) > 4:
@@ -17,7 +17,7 @@ if __name__ == '__main__':
         BEGIN_TIME = int(os.sys.argv[3])
         END_TIME = int(os.sys.argv[4])
     else:
-        print('python remcom_test.py <file> <dir> <begin> <end>')
+        print('python run_remcom.py <file> <dir> <begin> <end>')
         exit(0)
 
-    remcom_test_main(MOVIE_FILENAME, OUTPUT_DIR, BEGIN_TIME, END_TIME)
+    remcom_main(MOVIE_FILENAME, OUTPUT_DIR, BEGIN_TIME, END_TIME)

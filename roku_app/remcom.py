@@ -47,12 +47,12 @@ def make_video_script(input_file='', begin_time=0):
                                              prefix='temp')
 
 
-def remcom_test(movie_filename, output_dir, begin_time, end_time,
+def remcom(movie_filename, output_dir, begin_time, end_time,
                 msg_q=None, socketfile=REMCOM_SOCKET_FILE):
     '''
         main function, takes filename, timing file as options
         communication via socket:
-            q: quit remcom_test
+            q: quit remcom
             f: move forward, number of minutes can be included, i.e.
                 f5 moves forward 5 minues
             b: move backwards... b5 moves backwards 5 minutes
@@ -134,11 +134,11 @@ def keyboard_input():
             return os.sys.stdin.readline()
     return None
 
-def remcom_test_main(movie_filename, output_dir, begin_time, end_time):
+def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''
     msg_q = multiprocessing.Queue()
 
-    net = multiprocessing.Process(target=remcom_test,
+    net = multiprocessing.Process(target=remcom,
                                   args=(movie_filename, output_dir,
                                         begin_time, end_time, msg_q))
     net.start()
