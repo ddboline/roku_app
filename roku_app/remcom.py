@@ -33,18 +33,21 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
 
 def make_video_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
+    if not os.path.exists(input_file):
+        return -1
     input_string = '%d,%d' % (begin_time, begin_time+10)
-    remove_commercials(infile=input_file, outfile='%s/temp.avi' % HOMEDIR,
+    avifile = '%s/temp.avi' % HOMEDIR
+    mp4file = '%s/temp.mp4' % HOMEDIR
+    wavfile = '%s/temp.wav' % HOMEDIR
+    remove_commercials(infile=input_file, outfile=avifile,
                        timing_string=input_string)
-    run_command('time HandBrakeCLI -i %s/temp.avi -f mp4 -e x264 ' % HOMEDIR +
-                '-b 600 -o %s/temp.mp4 > /dev/null 2>&1\n' % HOMEDIR)
-    run_command('mpv --ao=pcm:file=%s/temp.wav --no-video ' % HOMEDIR +
-                '%s/temp.avi > /dev/null 2>&1\n' % HOMEDIR)
-    run_command('mv %s/temp.mp4 %s/public_html/videos/temp.mp4\n'
-                % (HOMEDIR, HOMEDIR))
-    os.remove('%s/temp.avi' % HOMEDIR)
-    return make_audio_analysis_plots_wrapper('%s/temp.wav' % HOMEDIR,
-                                             prefix='temp')
+    run_command('time HandBrakeCLI -i %s -f mp4 -e x264 ' % avifile +
+                '-b 600 -o %s > /dev/null 2>&1\n' % mp4file)
+    run_command('mpv --ao=pcm:file=%s --no-video ' % wavfile +
+                '%s > /dev/null 2>&1\n' % avifile)
+    run_command('mv %s %s/public_html/videos/temp.mp4\n' % (mp4file, HOMEDIR))
+    os.remove(avifile)
+    return make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
 
 
 def remcom(movie_filename, output_dir, begin_time, end_time,
@@ -59,7 +62,6 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
             s: select
             v: test video
             t: thumbnail
-
     '''
     with OpenUnixSocketServer(socketfile) as sock:
         while True:
@@ -103,8 +105,7 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                     else:
                         try:
                             end_time = int(option) * 60
-                            print('set end_time to %s %s' % (option,
-                                                             type(option)))
+                            print('end_time: %s' % option)
                         except ValueError:
                             continue
                 outstring.append(

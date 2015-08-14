@@ -92,6 +92,9 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     import matplotlib.pyplot as pl
     from scipy.io import wavfile
 
+    if not os.path.exists(infile):
+        return -1
+
     try:
         rate, data = wavfile.read(infile)
     except ValueError:
@@ -102,6 +105,8 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     tvec = np.arange(0, time_, dt_)
     sig0 = data[:, 0]
     sig1 = data[:, 1]
+    if not (tvec.shape == sig0.shape == sig1.shape):
+        return -1
     if not do_fft:
         fft_sum_ = float(np.sum(np.abs(sig0)))
         if hasattr(fft_sum, 'value'):

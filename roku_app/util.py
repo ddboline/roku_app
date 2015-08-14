@@ -125,8 +125,6 @@ def datetimestring(date_):
 def datetimefromstring(tstr, ignore_tz=False):
     ''' parse datetime string '''
     import dateutil.parser
-    #tstr = tstr.replace('-05:00', '-0500').replace('-04:00', '-0400')
-    #print(tstr)
     return dateutil.parser.parse(tstr, ignoretz=ignore_tz)
 
 
@@ -148,7 +146,6 @@ class OpenUnixSocketServer(object):
             time.sleep(10)
             print('failed to open socket %s' % exc)
             return self.__enter__()
-        print('open socket')
         self.sock.listen(0)
         return self.sock
 
