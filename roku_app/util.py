@@ -50,21 +50,6 @@ def run_command(command, do_popen=False, turn_on_commands=True,
     else:
         return call(command, shell=True)
 
-def run_remote_command(command, is_remote=False, sshclient=None):
-    ''' wrapper around os.system which also handles ssh calls '''
-    if not is_remote:
-        return run_command(command, do_popen=True)
-    elif not sshclient:
-        cmd = 'ssh %s \"%s\"' % (is_remote, command)
-        print(cmd)
-        return Popen(cmd, shell=True, stdout=PIPE,
-                     close_fds=True).stdout.read()
-    else:
-        sshclient.sendline(command)
-        sshclient.prompt()
-        output = sshclient.before.decode()
-        return output.split('\n')[1:-1]
-
 def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     ''' send string to specified socket '''
     net_type = socket.AF_INET
@@ -88,12 +73,12 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     return retval
 
 def convert_date(input_date):
-    ''' convert date string MM-DD-YYYY to date object '''
+    ''' convert date string MM-DD-YY to date object '''
     import datetime
     _month = int(input_date[0:2])
     _day = int(input_date[2:4])
     _year = 2000 + int(input_date[4:6])
-    return datetime.date(_year, _month, _day)
+    return datetime.date(_year, _month, _day)    
 
 def print_h_m_s(second):
     ''' convert time from seconds to hh:mm:ss format '''
@@ -176,3 +161,26 @@ class OpenSocketConnection(object):
             return False
         else:
             return True
+
+def test_popenwrapper():
+    cmd_ = 'echo "HELLO"'
+    output_ = None
+    with PopenWrapperClass(cmd_) as pop_:
+        output_ = pop_.read().strip().decode()
+    assert output_ == 'HELLO'
+
+def test_run_command():
+    cmd_ = 'echo "HELLO"'
+    with run_command(cmd_, do_popen=True, single_line=True) as pop_:
+        output_ = pop_.read().strip().decode()
+    assert output_ == 'HELLO'
+
+def test_convert_date():
+    import datetime
+    inp_date = '111780'
+    out_date = convert_date(inp_date)
+    if out_date.year > datetime.date.today().year:
+        out_date = datetime.date(year=out_date.year-100,
+                                 month=out_date.month,
+                                 day=out_date.day)
+    assert out_date == datetime.date(1980, 11, 17)
