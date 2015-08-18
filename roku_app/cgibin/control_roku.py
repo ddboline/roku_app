@@ -50,23 +50,17 @@ def send_command(ostr, host='localhost', portno=10888,
         if not sock:
             return 'Failed to open socket'
         sock.send(b'%s\n' % ostr)
-        retval = sock.recv(1024)
-        return retval
+        return sock.recv(1024)
 
 def get_output(val, host='localhost', portno=10888,
                socketfile='/tmp/.record_roku_socket'):
 
     print "Content-Type: text/html\n\n\n"
-    print
 
     ostr = send_command(val, host, portno, socketfile)
 
-    if not ostr:
-        return
-
-    print ostr.replace('command w','').replace('command','')
-
-    return
+    if ostr:
+        print ostr.replace('command w','').replace('command','')
 
 if __name__ == '__main__':
 
