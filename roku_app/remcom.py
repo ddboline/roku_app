@@ -129,11 +129,13 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
 
 def keyboard_input():
     ''' keyboard input from stdin using select function '''
-    in_, _, _ = select([os.sys.stdin], [], [], 0.0001)
-    for s__ in in_:
-        if s__ == os.sys.stdin:
-            return os.sys.stdin.readline()
-    return None
+    while True:
+        in_, _, _ = select([os.sys.stdin], [], [], 0.1)
+        for s__ in in_:
+            if s__ == os.sys.stdin:
+                yield os.sys.stdin.readline()
+        else:
+            yield None
 
 def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''
@@ -145,9 +147,7 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
     net.start()
     time.sleep(5)
 
-    option = None
-    while True:
-        option = keyboard_input()
+    for option in keyboard_input():
         if option:
             option = send_command(option, socketfile=REMCOM_SOCKET_FILE)
             if option:
@@ -162,5 +162,5 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
                                                             os.getpid()))
             print('killing %d %d' % (net.pid, os.getpid()))
             break
-        time.sleep(1)
+        time.sleep(0.1)
     net.join(10)
