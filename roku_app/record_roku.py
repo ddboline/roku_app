@@ -223,10 +223,9 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
             while not cmd_q.empty():
                 temp = cmd_q.get()
                 _cmds = ''
-                if temp.find('command') == 0:
+                if temp.startswith('command'):
                     _cmds = temp.split()[1:]
                 else:
-                    cmd_q.put(temp)
                     continue
 
                 for _cmd in _cmds:
@@ -252,7 +251,6 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                                             fname, prefix='test')
                     else:
                         outstring = send_to_roku([_cmd])
-                        print(outstring)
                     if outstring:
                         msg_q.put(outstring)
                     time.sleep(1)
@@ -277,7 +275,7 @@ def make_thumb_script(prefix='test_roku'):
     return time_, st_
 
 
-def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
+def monitoring_thread(prefix='test_roku', msg_q=None, mon_q=None):
     '''
         seperate monitoring thread
         to periodically write out thumbnails/test-scripts
@@ -288,12 +286,10 @@ def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
     else:
         sleep_time = 10
     while 1:
-        if cmd_q:
-            temp = cmd_q.get()
-            if temp.find('monitor') == 0:
+        if mon_q:
+            temp = mon_q.get()
+            if temp.startswith('monitor'):
                 sleep_time = int(temp.split()[1])
-            else:
-                cmd_q.put(temp)
         time.sleep(sleep_time)
         total_time += sleep_time
         if total_time == 60 or total_time == 300:
@@ -308,7 +304,7 @@ def monitoring_thread(prefix='test_roku', msg_q=None, cmd_q=None):
     return 0
 
 def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
-                    cmd_q=None, use_mplayer=True):
+                    mon_q=None, use_mplayer=True):
     ''' begin recording, star control, monioring, server threads '''
     import shlex
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
@@ -324,7 +320,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     logging.info('recording pid: %s\n', recording_process.pid)
 
     monitoring = Process(target=monitoring_thread,
-                                         args=(prefix, msg_q, cmd_q,))
+                                         args=(prefix, msg_q, mon_q,))
     monitoring.start()
 
     GLOBAL_LIST_OF_SUBPROCESSES.append(monitoring.pid)
@@ -402,6 +398,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
 
     msg_q = Queue()
     cmd_q = Queue()
+    mon_q = Queue()
 
     net = Process(target=server_thread,
                                   args=(recording_name, msg_q, cmd_q,))
@@ -414,7 +411,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
 
     initialize_roku(do_fix_pvr, msg_q)
 
-    rec, mon = start_recording(device, recording_name, msg_q, cmd_q)
+    rec, mon = start_recording(device, recording_name, msg_q, mon_q)
     with open(KILLSCRIPT, 'w') as outfile:
         outfile.write('kill -9 %d %d %d %d %d\n' %
                 (net.pid, cmd.pid, mon.pid, rec.pid, os.getpid()))
@@ -422,7 +419,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     time.sleep(recording_time)
 
     ### use cmd_q to change update time, not msg_q
-    cmd_q.put('monitor 10')
+    mon_q.put('monitor 10')
     msg_q.put('finished recording')
     logging.info('finished recording\n')
     signal_finish(recording_name)
