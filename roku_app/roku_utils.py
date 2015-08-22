@@ -69,7 +69,8 @@ def send_to_roku(arglist=None):
 
     for arg in arglist:
         if arg in ['thumb', 'test', 'q']:
-            retval = '%s%s' % (retval, send_command(arg, portno=10888))
+            retval = '%s%s' % (retval, send_command(arg,
+                                        socketfile='/tmp/.record_roku_socket'))
         elif arg == 'run':
             time.sleep(5)
             print('run\n')
