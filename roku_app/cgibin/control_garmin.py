@@ -14,5 +14,5 @@ if __name__ == '__main__':
     if "cmd" not in form:
         print "<H1>Error</H1>"
         print "Please fill in the cmd field."
-
-    get_output(form['cmd'].value, socketfile='/tmp/.garmin_test_socket')
+    else:
+        get_output(form['cmd'].value, socketfile='/tmp/.garmin_test_socket')
