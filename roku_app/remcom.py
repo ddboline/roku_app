@@ -118,9 +118,7 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                                        % HOMEDIR)
                 outstring.append('%d, s/f/b/q/t:' % (tmp_begin / 60))
                 outstring = '\n'.join(outstring)
-                if hasattr(outstring, 'encode'):
-                    outstring = outstring.encode()
-                conn.send(outstring)
+                conn.send(outstring.encode())
 
         if original_end_time > end_time:
             print('original %s new %s args %s' % (original_end_time, end_time,
@@ -131,11 +129,12 @@ def keyboard_input():
     ''' keyboard input from stdin using select function '''
     while True:
         in_, _, _ = select([os.sys.stdin], [], [], 0.1)
-        for s__ in in_:
-            if s__ == os.sys.stdin:
-                yield os.sys.stdin.readline()
-        else:
+        if not in_:
             yield None
+        else:
+            for s__ in in_:
+                if s__ == os.sys.stdin:
+                    yield os.sys.stdin.readline()
 
 def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''

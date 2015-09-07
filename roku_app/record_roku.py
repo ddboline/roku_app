@@ -1,8 +1,8 @@
 #! /usr/bin/env python
 # -*- coding: utf-8 -*-
-'''
+"""
     Script to record from roku device via WinTV HVR-1950
-'''
+"""
 from __future__ import print_function
 
 import os
@@ -26,7 +26,7 @@ KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
 GLOBAL_LIST_OF_SUBPROCESSES = []
 
 def list_running_recordings(devname='/dev/video0'):
-    ''' list any currently running recordings '''
+    """ list any currently running recordings """
     pids = []
     _cmd = 'fuser -a %s 2> /dev/null' % devname
     with run_command(_cmd, do_popen=True) as pop_:
@@ -51,7 +51,7 @@ def list_running_recordings(devname='/dev/video0'):
     return pids
 
 def kill_running_recordings(pids=None):
-    ''' kill list of pids '''
+    """ kill list of pids """
     if os.path.exists(KILLSCRIPT):
         run_command('sh %s' % KILLSCRIPT)
         os.remove(KILLSCRIPT)
@@ -65,7 +65,7 @@ def kill_running_recordings(pids=None):
     return
 
 def initialize_roku(do_fix_pvr=False, msg_q=None):
-    ''' initialize wintv device '''
+    """ initialize wintv device """
 
     if msg_q:
         msg_q.put('begin initialization')
@@ -102,7 +102,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
 def make_video(prefix='test_roku', begin_time=0,
                     use_handbrake_for_test_script=False):
-    ''' write video file, then run audio analysis on it '''
+    """ write video file, then run audio analysis on it """
     if use_handbrake_for_test_script:
         cmd_ = 'time HandBrakeCLI ' + \
                '-i ~/netflix/mpg/%s_0.mpg ' % prefix + \
@@ -135,10 +135,10 @@ def make_video(prefix='test_roku', begin_time=0,
 
 def make_transcode_script(prefix='test_roku',
                           use_handbrake_for_transcode=False):
-    '''
+    """
         write out transcode file at the end of the recording,
         will be used to convert mpg to avi / mp4 later on
-    '''
+    """
     bitrate = 600
     mencopts = '-ovc lavc -oac mp3lame ' +\
                '-lavcopts vcodec=mpeg4:vbitrate=%s:threads=2 ' % bitrate +\
@@ -162,12 +162,12 @@ def make_transcode_script(prefix='test_roku',
 
 def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                   socketfile='/tmp/.record_roku_socket'):
-    '''
+    """
         the server thread
         listen for requests to write thumbnail/test-script
         q, thumb, test, and time are run separately
         all others are passed to send_to_roku
-    '''
+    """
     logging.info('starting network_thread\n')
 
     with OpenUnixSocketServer(socketfile) as sock:
@@ -216,7 +216,7 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
     return 0
 
 def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
-    ''' independent thread to carry out commands '''
+    """ independent thread to carry out commands """
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
     while 1:
         if cmd_q:
@@ -258,7 +258,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
 
 
 def make_thumb_script(prefix='test_roku'):
-    ''' write thumbnail and test-script at current time '''
+    """ write thumbnail and test-script at current time """
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
 
     if not os.path.exists(fname):
@@ -276,10 +276,10 @@ def make_thumb_script(prefix='test_roku'):
 
 
 def monitoring_thread(prefix='test_roku', msg_q=None, mon_q=None):
-    '''
+    """
         seperate monitoring thread
         to periodically write out thumbnails/test-scripts
-    '''
+    """
     total_time = 0
     if prefix != 'test_roku':
         sleep_time = 60
@@ -305,7 +305,7 @@ def monitoring_thread(prefix='test_roku', msg_q=None, mon_q=None):
 
 def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
                     mon_q=None, use_mplayer=True):
-    ''' begin recording, star control, monioring, server threads '''
+    """ begin recording, star control, monioring, server threads """
     import shlex
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
     if use_mplayer:
@@ -351,10 +351,10 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     return [recording_process, monitoring]
 
 def signal_finish(prefix='test_roku'):
-    '''
+    """
         convenience function to run at end of recording time
         modifies kill file
-    '''
+    """
     if prefix != 'test_roku':
         with open(KILLSCRIPT, 'a') as outfile:
             outfile.write('\n mv %s/netflix/tmp/%s.sh ' % (HOMEDIR, prefix))
@@ -364,7 +364,7 @@ def signal_finish(prefix='test_roku'):
     return
 
 def stop_recording(prefix='test_roku'):
-    ''' run kill file when we stop recording '''
+    """ run kill file when we stop recording """
     run_command('send_to_gtalk \"killing %s\"' % prefix)
     if os.path.exists(KILLSCRIPT):
         run_command('sh %s ; rm %s' % (KILLSCRIPT, KILLSCRIPT))
@@ -372,11 +372,11 @@ def stop_recording(prefix='test_roku'):
 
 def record_roku(recording_name='test_roku', recording_time=3600,
                 do_fix_pvr=False):
-    '''
+    """
         main function, record video from roku device via wintv encoder
         options:
             name, duration, fix_pvr (optional),
-    '''
+    """
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
     device = get_dev('pvrusb')
 

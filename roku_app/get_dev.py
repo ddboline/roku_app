@@ -46,10 +46,27 @@ def get_dev(user_mod=''):
                 if user_mod in driver or (not user_mod and driver == 'em28xx'):
                     return devname
 
+def test_is_module_loaded():
+    """ test is_module_loaded """
+    assert is_module_loaded() == True
+    assert is_module_loaded('asdfasdf') == False
+
+def test_get_dev():
+    """ test get_dev """
+    assert get_dev('bttv0') == '/dev/video0'
+
+def main(args):
+    """ main function """
+    user_module = ''
+
+    if len(args) > 1:
+        user_module = args[1]
+
+    return get_dev(user_module)
+
+def test_main():
+    """ test main """
+    assert main('bttv0') == '/dev/video0'
+
 if __name__ == '__main__':
-    USER_MODULE = ''
-
-    if len(os.sys.argv) > 1:
-        USER_MODULE = os.sys.argv[1]
-
-    print(get_dev(USER_MODULE))
+    print(main(os.sys.argv))

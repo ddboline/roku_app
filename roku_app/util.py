@@ -57,10 +57,11 @@ def run_command(command, do_popen=False, turn_on_commands=True,
         return call(command, shell=True)
 
 def test_run_command():
+    """ test run_command """
     cmd = 'echo "HELLO"'
     out = run_command(cmd, do_popen=True, single_line=True).strip()
     assert out == b'HELLO'
-    
+
     out = run_command(cmd, turn_on_commands=False)
     assert out == cmd
 
@@ -77,8 +78,8 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     sock_ = socket.socket(net_type, stm_type)
     try:
         sock_.connect(addr_obj)
-    except Exception:
-        print('failed to open socket')
+    except Exception as exc:
+        print('failed to open socket %s' % exc)
         return False
 
     sock_.send(b'%s\n' % ostr)
@@ -92,7 +93,7 @@ def convert_date(input_date):
     _month = int(input_date[0:2])
     _day = int(input_date[2:4])
     _year = 2000 + int(input_date[4:6])
-    return datetime.date(_year, _month, _day)    
+    return datetime.date(_year, _month, _day)
 
 def print_h_m_s(second):
     ''' convert time from seconds to hh:mm:ss format '''
@@ -177,6 +178,7 @@ class OpenSocketConnection(object):
             return True
 
 def test_popenwrapper():
+    """ test PopenWrapperClass """
     cmd_ = 'echo "HELLO"'
     output_ = None
     with PopenWrapperClass(cmd_) as pop_:
@@ -185,6 +187,7 @@ def test_popenwrapper():
 
 
 def test_convert_date():
+    """ test convert_date """
     import datetime
     inp_date = '111780'
     out_date = convert_date(inp_date)
