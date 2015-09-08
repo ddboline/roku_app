@@ -12,19 +12,20 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import numpy as np
-from scipy import fftpack
-import matplotlib
-matplotlib.use('Agg')
-import matplotlib.pyplot as pl
-from scipy.io import wavfile
 
 from .util import run_command
-from .roku_utils import HOMEDIR
+from .roku_utils import HOMEDIR, get_length_of_mpg
 
 def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
                               do_fft=True, fft_sum=None):
     ''' create frequency plot '''
+    import numpy as np
+    from scipy import fftpack
+    from scipy.io import wavfile
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as pl
+
     if not os.path.exists(infile):
         return -1
 
@@ -78,6 +79,10 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
 
 def make_time_series_plot(input_file='', prefix='temp'):
     ''' create wav and time plot '''
+    import numpy as np
+    import matplotlib
+    matplotlib.use('Agg')
+    import matplotlib.pyplot as pl
 
     length_of_file = get_length_of_mpg(input_file)
     audio_vals = []
