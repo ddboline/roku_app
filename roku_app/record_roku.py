@@ -182,9 +182,8 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                     if arg == 'q':
                         ### quit command: kill everything
                         if os.path.exists(KILLSCRIPT):
-                            run_command('sh %s' % KILLSCRIPT)
-                            os.remove(KILLSCRIPT)
-                        sock.close()
+                            run_command('sh %s ; rm %s' % (KILLSCRIPT,
+                                                           KILLSCRIPT))
                         return 0
                     elif arg == 'output':
                         ### output command: dump first msg_q to socket
