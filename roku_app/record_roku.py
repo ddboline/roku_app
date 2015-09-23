@@ -437,3 +437,23 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     net.join()
     cmd.join()
     return 0
+
+def main():
+    from sys import argv
+
+    recording_name = 'test_roku'
+    recording_time = 3600
+    do_fix_pvr = False
+
+    if len(argv) > 1:
+        recording_name = argv[1]
+    if len(argv) > 2:
+        try:
+            recording_time = int(argv[2])*60
+        except ValueError:
+            pass
+    if len(argv) > 3:
+        if argv[3] == 'fix_pvr':
+            do_fix_pvr = True
+
+    record_roku(recording_name, recording_time, do_fix_pvr)
