@@ -20,7 +20,7 @@ setup(
     description='roku_app',
     long_description='Roku Recording App',
     license='MIT',
-#    install_requires=['pandas >= 0.13.0', 'numpy >= 1.8.0'],
+    install_requires=['pandas', 'numpy', 'matplotlib', 'requests'],
     packages=['roku_app'],
     package_dir={'roku_app': 'roku_app'},
     package_data={'roku_app': ['roku_app/templates/*.html']},
