@@ -62,3 +62,5 @@ run/
 *.gz
 client_secrets.json
 drive.dat
+*.dot
+*.ps
