@@ -24,6 +24,7 @@ HOMEDIR = os.getenv('HOME')
 TESTSCRIPT = '%s/netflix/test.sh' % HOMEDIR
 KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
 GLOBAL_LIST_OF_SUBPROCESSES = []
+NCPU = multiprocessing.cpu_count()
 
 def list_running_recordings(devname='/dev/video0'):
     """ list any currently running recordings """
@@ -114,7 +115,7 @@ def make_video(prefix='test_roku', begin_time=0,
         cmd_ = 'time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix + \
                 '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
                 '-oac mp3lame ' + \
-                '-lavcopts vcodec=mpeg4:vbitrate=600:threads=2 ' + \
+                '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
                 '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
                 '> ~/netflix/log/test.out 2>&1 && ' + \
                 'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
@@ -141,8 +142,8 @@ def make_transcode_script(prefix='test_roku',
     """
     bitrate = 600
     mencopts = '-ovc lavc -oac mp3lame ' +\
-               '-lavcopts vcodec=mpeg4:vbitrate=%s:threads=2 ' % bitrate +\
-               '-lameopts fast:preset=medium -idx'
+               '-lavcopts vcodec=mpeg4:vbitrate=%s:' % bitrate +\
+               'threads=%s -lameopts fast:preset=medium -idx' % NCPU
 
     with open('%s/netflix/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
         outfile.write('#!/bin/bash\n')
