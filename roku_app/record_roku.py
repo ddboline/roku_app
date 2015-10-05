@@ -8,7 +8,7 @@ from __future__ import print_function
 import os
 import time
 from subprocess import Popen
-from multiprocessing import Queue, Process
+from multiprocessing import Queue, Process, cpu_count
 import socket
 import logging
 
@@ -24,7 +24,7 @@ HOMEDIR = os.getenv('HOME')
 TESTSCRIPT = '%s/netflix/test.sh' % HOMEDIR
 KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
 GLOBAL_LIST_OF_SUBPROCESSES = []
-NCPU = multiprocessing.cpu_count()
+NCPU = cpu_count()
 
 def list_running_recordings(devname='/dev/video0'):
     """ list any currently running recordings """

@@ -53,7 +53,7 @@ def test_is_module_loaded():
 
 def test_get_dev():
     """ test get_dev """
-    assert get_dev('bttv0') == '/dev/video0'
+    assert get_dev('pvrusb2') == '/dev/video0'
 
 def main(args):
     """ main function """
@@ -66,7 +66,7 @@ def main(args):
 
 def test_main():
     """ test main """
-    assert main('bttv0') == '/dev/video0'
+    assert main('pvrusb2') == '/dev/video0'
 
 if __name__ == '__main__':
     print(main(os.sys.argv))
