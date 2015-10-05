@@ -16,6 +16,7 @@ import os
 from .util import run_command
 from .roku_utils import HOMEDIR, get_length_of_mpg
 
+
 def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
                               do_fft=True, fft_sum=None):
     ''' create frequency plot '''
@@ -76,6 +77,7 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     if hasattr(fft_sum, 'value'):
         fft_sum.value = fft_sum_
     return fft_sum_
+
 
 def make_time_series_plot(input_file='', prefix='temp'):
     ''' create wav and time plot '''

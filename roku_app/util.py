@@ -10,10 +10,12 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import socket, time
+import time
+import socket
 from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')
+
 
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
@@ -41,6 +43,7 @@ class PopenWrapperClass(object):
             else:
                 return True
 
+
 def run_command(command, do_popen=False, turn_on_commands=True,
                 single_line=False):
     """ wrapper around os.system """
@@ -56,6 +59,7 @@ def run_command(command, do_popen=False, turn_on_commands=True,
     else:
         return call(command, shell=True)
 
+
 def test_run_command():
     """ test run_command """
     cmd = 'echo "HELLO"'
@@ -64,6 +68,7 @@ def test_run_command():
 
     out = run_command(cmd, turn_on_commands=False)
     assert out == cmd
+
 
 def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     ''' send string to specified socket '''
@@ -87,6 +92,7 @@ def send_command(ostr, host='localhost', portno=10888, socketfile=None):
     sock_.close()
     return retval
 
+
 def convert_date(input_date):
     ''' convert date string MM-DD-YY to date object '''
     import datetime
@@ -95,12 +101,14 @@ def convert_date(input_date):
     _year = 2000 + int(input_date[4:6])
     return datetime.date(_year, _month, _day)
 
+
 def print_h_m_s(second):
     ''' convert time from seconds to hh:mm:ss format '''
     hours = int(second / 3600)
     minutes = int(second / 60) - hours * 60
     seconds = int(second) - minutes * 60 - hours * 3600
     return '%02i:%02i:%02i' % (hours, minutes, seconds)
+
 
 def print_m_s(second):
     ''' convert time from seconds to mm:ss format '''
@@ -112,6 +120,7 @@ def print_m_s(second):
     else:
         return '%02i:%02i:%02i' % (hours, minutes, seconds)
 
+
 def datetimestring(date_):
     ''' input should be datetime object, output is string '''
     if not hasattr(date_, 'strftime'):
@@ -121,6 +130,7 @@ def datetimestring(date_):
         return str_
     elif len(str_) == 19 and 'Z' not in str_:
         return '%sZ' % str_
+
 
 def datetimefromstring(tstr, ignore_tz=False):
     ''' parse datetime string '''
@@ -176,6 +186,7 @@ class OpenSocketConnection(object):
             return False
         else:
             return True
+
 
 def test_popenwrapper():
     """ test PopenWrapperClass """

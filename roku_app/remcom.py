@@ -19,6 +19,7 @@ from .util import (run_command, send_command,
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
 HOMEDIR = os.getenv('HOME')
 
+
 def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
                                end_time=0):
     '''
@@ -30,6 +31,7 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
                                               input_file.split('/')[-1]),
                        timing_string=input_string)
     return 0
+
 
 def make_video_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
@@ -51,7 +53,7 @@ def make_video_script(input_file='', begin_time=0):
 
 
 def remcom(movie_filename, output_dir, begin_time, end_time,
-                msg_q=None, socketfile=REMCOM_SOCKET_FILE):
+           msg_q=None, socketfile=REMCOM_SOCKET_FILE):
     '''
         main function, takes filename, timing file as options
         communication via socket:
@@ -98,7 +100,7 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                     elif option == 'v':
                         outstring.append(
                             '%s' % make_video_script(movie_filename,
-                                                    begin_time=end_time))
+                                                     begin_time=end_time))
                     elif option == 't':
                         outstring.append(
                             make_time_series_plot_wrapper(movie_filename))
@@ -112,10 +114,11 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                     '%s %s %s %s' % (movie_filename.split('/')[-1],
                                      '/'.join(output_dir.split('/')[-2:]),
                                      begin_time, end_time))
-                tmp_begin = make_thumbnails(
-                            input_file=movie_filename, begin_time=end_time,
-                            output_dir='%s/public_html/videos/thumbnails_tv'
-                                       % HOMEDIR)
+                tmp_begin = make_thumbnails(input_file=movie_filename,
+                                            begin_time=end_time,
+                                            output_dir=HOMEDIR +
+                                            '/public_html/videos/'
+                                            'thumbnails_tv')
                 outstring.append('%d, s/f/b/q/t:' % (tmp_begin / 60))
                 outstring = '\n'.join(outstring)
                 conn.send(outstring.encode())
@@ -124,6 +127,7 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
             print('original %s new %s args %s' % (original_end_time, end_time,
                                                   args))
     return 0
+
 
 def keyboard_input():
     ''' keyboard input from stdin using select function '''
@@ -135,6 +139,7 @@ def keyboard_input():
             for s__ in in_:
                 if s__ == os.sys.stdin:
                     yield os.sys.stdin.readline()
+
 
 def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''

@@ -11,6 +11,7 @@ try:
 except (ValueError, SystemError):
     from util import run_command
 
+
 def is_module_loaded(user_mod='pvrusb2'):
     ''' has module been loaded? '''
     with run_command('lsmod', do_popen=True) as pop_:
@@ -19,9 +20,10 @@ def is_module_loaded(user_mod='pvrusb2'):
                 return True
     return False
 
+
 def get_dev(user_mod=''):
     '''
-        use v4l-info to determine which device is associated with a given driver
+        use v4l-info to determine device for a given driver module
     '''
     if user_mod == 'bttv0':
         user_mod = 'bttv'
@@ -46,14 +48,17 @@ def get_dev(user_mod=''):
                 if user_mod in driver or (not user_mod and driver == 'em28xx'):
                     return devname
 
+
 def test_is_module_loaded():
     """ test is_module_loaded """
-    assert is_module_loaded() == True
-    assert is_module_loaded('asdfasdf') == False
+    assert is_module_loaded() is True
+    assert is_module_loaded('asdfasdf') is False
+
 
 def test_get_dev():
     """ test get_dev """
     assert get_dev('pvrusb2') == '/dev/video0'
+
 
 def main(args):
     """ main function """
@@ -63,6 +68,7 @@ def main(args):
         user_module = args[1]
 
     return get_dev(user_module)
+
 
 def test_main():
     """ test main """

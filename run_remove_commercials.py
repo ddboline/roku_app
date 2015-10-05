@@ -19,5 +19,4 @@ if __name__ == '__main__':
         TIMING_FILENAME = os.sys.argv[3]
     TIMING_STRING = open(TIMING_FILENAME, 'r').read()
 
-
     remove_commercials(INFILE, OUTFILE, TIMING_STRING)

@@ -23,6 +23,7 @@ from .util import run_command, send_command
 HOMEDIR = os.getenv('HOME')
 USER = os.getenv('USER')
 
+
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
     roku_ip = '192.168.0.101'
@@ -36,6 +37,7 @@ def send_single_keypress(keypress):
         if result.status_code != 200:
             return 'Error %d on keypress %s' % (result.status_code, keypress)
     return keypress
+
 
 def send_to_roku(arglist=None):
     '''
@@ -62,7 +64,7 @@ def send_to_roku(arglist=None):
                          'bs': 'Backspace',
                          'sc': 'Search',
                          'en': 'Enter',
-                         'as': 'Lit_*',}
+                         'as': 'Lit_*'}
 
     if not arglist or len(arglist) == 0:
         return retval
@@ -70,7 +72,7 @@ def send_to_roku(arglist=None):
     for arg in arglist:
         if arg in ['thumb', 'test', 'q']:
             retval = '%s%s' % (retval, send_command(arg,
-                                        socketfile='/tmp/.record_roku_socket'))
+                               socketfile='/tmp/.record_roku_socket'))
         elif arg == 'run':
             time.sleep(5)
             print('run\n')
@@ -83,16 +85,18 @@ def send_to_roku(arglist=None):
             retval = send_single_keypress(arg)
     return retval
 
+
 def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
-                              do_fft=True):
+                                      do_fft=True):
     ''' wrapper around make_audio_analysis_plots '''
     from .audio_utils import make_audio_analysis_plots
     fft_sum = Value('d')
     tmp_ = Process(target=make_audio_analysis_plots,
-                  args=(infile, prefix, make_plots, do_fft, fft_sum,))
+                   args=(infile, prefix, make_plots, do_fft, fft_sum,))
     tmp_.start()
     tmp_.join()
     return fft_sum.value
+
 
 def make_time_series_plot_wrapper(input_file='', prefix='temp'):
     ''' wrapper around make_time_series_plot '''
@@ -101,6 +105,7 @@ def make_time_series_plot_wrapper(input_file='', prefix='temp'):
     tmp_.start()
     tmp_.join()
     return 'Done'
+
 
 def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
     ''' get length of mpg/avi/mp4 with avconv '''
@@ -123,10 +128,12 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
                 nsecs = -1
     return nsecs
 
+
 def get_random_hex_string(nbytes):
     ''' use os.urandom to create n byte random string, output integer '''
     from binascii import b2a_hex
     return int(b2a_hex(os.urandom(nbytes)), 16)
+
 
 def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
                     output_dir='%s/public_html/videos/thumbnails' % HOMEDIR,
@@ -152,6 +159,7 @@ def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
     run_command('rm -rf %s' % tmpdir)
     return begin_time
 
+
 def write_single_line_to_file(fname, line, turn_on_commands=True):
     ''' convenience function, write single line to file then exit  '''
     if turn_on_commands:
@@ -159,6 +167,7 @@ def write_single_line_to_file(fname, line, turn_on_commands=True):
             file_.write(line)
     else:
         print('write %s to %s' % (line, fname))
+
 
 def run_fix_pvr(unload_module=True):
     '''
@@ -192,10 +201,11 @@ def run_fix_pvr(unload_module=True):
 
     return
 
+
 def check_dmesg_for_ooops():
     ''' check for ooops in dmesg output '''
     oops_messages = ['BUG: unable to handle kernel paging request at',
-                     'general protection fault',]
+                     'general protection fault']
     cmd_ = Popen('dmesg', shell=True, stdout=PIPE, close_fds=True).stdout
     for line in cmd_.readlines():
         if hasattr(line, 'decode'):
@@ -203,6 +213,7 @@ def check_dmesg_for_ooops():
         if any(mes in line for mes in oops_messages):
             return True
     return False
+
 
 def play_roku():
     ''' play roku '''

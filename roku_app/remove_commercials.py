@@ -9,6 +9,7 @@ from .util import run_command
 HOMEDIR = os.getenv('HOME')
 TMPDIR = '%s/tmp_avi' % HOMEDIR
 
+
 def remove_commercials(infile='', outfile='', timing_string='0,3600'):
     '''
         cut and splice recorded file to remove undesired sections (commercials)
@@ -21,7 +22,7 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600'):
             use mencoder to cut original file at specified begin/end times
         '''
         begin = time[0]
-        end = time[1]- time[0]
+        end = time[1] - time[0]
         delay = 0
         if len(time) > 2:
             delay = time[2]

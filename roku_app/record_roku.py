@@ -26,6 +26,7 @@ KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
 GLOBAL_LIST_OF_SUBPROCESSES = []
 NCPU = cpu_count()
 
+
 def list_running_recordings(devname='/dev/video0'):
     """ list any currently running recordings """
     pids = []
@@ -51,6 +52,7 @@ def list_running_recordings(devname='/dev/video0'):
                 continue
     return pids
 
+
 def kill_running_recordings(pids=None):
     """ kill list of pids """
     if os.path.exists(KILLSCRIPT):
@@ -65,6 +67,7 @@ def kill_running_recordings(pids=None):
         run_command(_cmd)
     return
 
+
 def initialize_roku(do_fix_pvr=False, msg_q=None):
     """ initialize wintv device """
 
@@ -72,14 +75,13 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
         msg_q.put('begin initialization')
 
     if check_dmesg_for_ooops():
-        _msg = 'signature of pvrusb2 ooops detected before unloading module,' +\
-               'stopping execution immediately'
+        _msg = 'signature of pvrusb2 ooops detected before ' +\
+               'unloading module, stopping execution immediately'
         run_command('send_to_gtalk \"%s\"' % _msg)
         kill_running_recordings(GLOBAL_LIST_OF_SUBPROCESSES)
         exit(1)
 
-    fix_pvr_process = Process(target=run_fix_pvr,\
-                              args=(do_fix_pvr,))
+    fix_pvr_process = Process(target=run_fix_pvr, args=(do_fix_pvr,))
     fix_pvr_process.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(fix_pvr_process.pid)
 
@@ -101,8 +103,9 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
     return
 
+
 def make_video(prefix='test_roku', begin_time=0,
-                    use_handbrake_for_test_script=False):
+               use_handbrake_for_test_script=False):
     """ write video file, then run audio analysis on it """
     if use_handbrake_for_test_script:
         cmd_ = 'time HandBrakeCLI ' + \
@@ -113,16 +116,16 @@ def make_video(prefix='test_roku', begin_time=0,
                '> ~/netflix/log/test.out 2>&1\n'
     else:
         cmd_ = 'time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix + \
-                '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
-                '-oac mp3lame ' + \
-                '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
-                '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
-                '> ~/netflix/log/test.out 2>&1 && ' + \
-                'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
-                '--no-video ~/test.avi > /dev/null 2>&1 && ' + \
-                'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
-                '-b 600 -o ~/test.mp4 >> ' + \
-                '~/netflix/log/test.out 2>&1'
+               '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
+               '-oac mp3lame ' + \
+               '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
+               '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
+               '> ~/netflix/log/test.out 2>&1 && ' + \
+               'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
+               '--no-video ~/test.avi > /dev/null 2>&1 && ' + \
+               'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
+               '-b 600 -o ~/test.mp4 >> ' + \
+               '~/netflix/log/test.out 2>&1'
 
     run_command(cmd_)
 
@@ -160,6 +163,7 @@ def make_transcode_script(prefix='test_roku',
             outfile.write('-o ~/netflix/avi/%s.avi ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
+
 
 def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                   socketfile='/tmp/.record_roku_socket'):
@@ -215,6 +219,7 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                     return server_thread(prefix, msg_q, cmd_q, socketfile)
     return 0
 
+
 def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
     """ independent thread to carry out commands """
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
@@ -248,7 +253,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                     elif _cmd == 'time':
                         if os.path.exists(fname):
                             outstring = make_time_series_plot_wrapper(
-                                            fname, prefix='test')
+                                fname, prefix='test')
                     else:
                         outstring = send_to_roku([_cmd])
                     if outstring:
@@ -303,6 +308,7 @@ def monitoring_thread(prefix='test_roku', msg_q=None, mon_q=None):
                 run_command('send_to_gtalk \"check_now\"')
     return 0
 
+
 def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
                     mon_q=None, use_mplayer=True):
     """ begin recording, star control, monioring, server threads """
@@ -319,8 +325,8 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
     logging.info('recording pid: %s\n', recording_process.pid)
 
-    monitoring = Process(target=monitoring_thread,
-                                         args=(prefix, msg_q, mon_q,))
+    monitoring = Process(target=monitoring_thread, args=(prefix, msg_q,
+                                                         mon_q,))
     monitoring.start()
 
     GLOBAL_LIST_OF_SUBPROCESSES.append(monitoring.pid)
@@ -329,7 +335,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     if not os.path.exists(fname):
         time.sleep(5)
         if not os.path.exists(fname):
-            _output = 'send_to_gtalk \"RECORDING HAS NOT STARTED, ' +\
+            _output = 'send_to_gtalk \"RECORDING HAS NOT STARTED, ' + \
                       '%s NOT FOUND, ABORTING\"' % fname
             run_command(_output)
             kill_running_recordings(GLOBAL_LIST_OF_SUBPROCESSES)
@@ -350,6 +356,7 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
 
     return [recording_process, monitoring]
 
+
 def signal_finish(prefix='test_roku'):
     """
         convenience function to run at end of recording time
@@ -363,12 +370,14 @@ def signal_finish(prefix='test_roku'):
     run_command('send_to_gtalk \"%s is done %d\"' % (prefix, int(_ta)))
     return
 
+
 def stop_recording(prefix='test_roku'):
     """ run kill file when we stop recording """
     run_command('send_to_gtalk \"killing %s\"' % prefix)
     if os.path.exists(KILLSCRIPT):
         run_command('sh %s ; rm %s' % (KILLSCRIPT, KILLSCRIPT))
     return
+
 
 def record_roku(recording_name='test_roku', recording_time=3600,
                 do_fix_pvr=False):
@@ -400,12 +409,10 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     cmd_q = Queue()
     mon_q = Queue()
 
-    net = Process(target=server_thread,
-                                  args=(recording_name, msg_q, cmd_q,))
+    net = Process(target=server_thread, args=(recording_name, msg_q, cmd_q,))
     net.start()
 
-    cmd = Process(target=command_thread,
-                                  args=(recording_name, msg_q, cmd_q,))
+    cmd = Process(target=command_thread, args=(recording_name, msg_q, cmd_q,))
     cmd.start()
     GLOBAL_LIST_OF_SUBPROCESSES.extend([net.pid, cmd.pid])
 
@@ -414,7 +421,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     rec, mon = start_recording(device, recording_name, msg_q, mon_q)
     with open(KILLSCRIPT, 'w') as outfile:
         outfile.write('kill -9 %d %d %d %d %d\n' %
-                (net.pid, cmd.pid, mon.pid, rec.pid, os.getpid()))
+                      (net.pid, cmd.pid, mon.pid, rec.pid, os.getpid()))
 
     time.sleep(recording_time)
 
@@ -438,6 +445,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     net.join()
     cmd.join()
     return 0
+
 
 def main():
     from sys import argv
