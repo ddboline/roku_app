@@ -13,7 +13,6 @@ requirements:
     - python
     - numpy
     - libpython # [py2k and win]
-    - setuptools
     - pandas
     - matplotlib
     - requests
