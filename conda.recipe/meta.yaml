@@ -32,10 +32,10 @@ test:
     - roku_app
 
   requires:
-   - nose
+    - nose
 
   commands:
-   - nosetests roku_app
+    - nosetests roku_app
 
 #about
   #home: http://pandas.pydata.org
