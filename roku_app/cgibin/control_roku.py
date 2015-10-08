@@ -8,6 +8,7 @@ import cgi
 
 import socket
 
+
 class OpenUnixSocketClient(object):
     def __init__(self, host='localhost', portno=10888,
                  socketfile='/tmp/.record_roku_socket'):
@@ -52,6 +53,7 @@ def send_command(ostr, host='localhost', portno=10888,
         sock.send(b'%s\n' % ostr)
         return sock.recv(1024)
 
+
 def get_output(val, host='localhost', portno=10888,
                socketfile='/tmp/.record_roku_socket'):
 
@@ -60,7 +62,7 @@ def get_output(val, host='localhost', portno=10888,
     ostr = send_command(val, host, portno, socketfile)
 
     if ostr:
-        print ostr.replace('command w','').replace('command','')
+        print ostr.replace('command w', '').replace('command', '')
 
 if __name__ == '__main__':
 
