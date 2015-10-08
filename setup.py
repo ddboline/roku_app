@@ -23,7 +23,7 @@ setup(
     install_requires=['pandas', 'numpy', 'matplotlib', 'requests'],
     packages=['roku_app'],
     package_dir={'roku_app': 'roku_app'},
-    package_data={'roku_app': ['roku_app/templates/*.html']},
+    package_data={'roku_app': ['roku_app/templates/*.html',]},
     entry_points={'console_scripts':
-                  ['run-recording = roku_app.record_roku:main']}
+                  ['run-recording = roku_app.record_roku:main',]}
 )
