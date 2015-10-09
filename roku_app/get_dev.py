@@ -70,9 +70,9 @@ def main(args):
     return get_dev(user_module)
 
 
-def test_main():
-    """ test main """
-    assert main('pvrusb2') == '/dev/video0'
+#def test_main():
+#    """ test main """
+#    assert main('pvrusb2') == '/dev/video0'
 
 if __name__ == '__main__':
     print(main(os.sys.argv))
