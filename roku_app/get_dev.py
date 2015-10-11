@@ -57,7 +57,8 @@ def test_is_module_loaded():
 
 def test_get_dev():
     """ test get_dev """
-    assert get_dev('pvrusb2') == '/dev/video0'
+    if os.path.exists('/dev/video0'):
+        assert get_dev('pvrusb2') == '/dev/video0'
 
 
 def main(args):
