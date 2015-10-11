@@ -16,6 +16,8 @@ def is_module_loaded(user_mod='pvrusb2'):
     ''' has module been loaded? '''
     with run_command('lsmod', do_popen=True) as pop_:
         for line in pop_:
+            if hasattr(line, 'decode'):
+                line = line.decode()
             if user_mod in line:
                 return True
     return False
