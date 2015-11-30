@@ -8,7 +8,7 @@ from __future__ import unicode_literals
 import os
 import time
 from select import select
-import multiprocessing
+import multiprocessing as mp
 
 from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
@@ -143,11 +143,10 @@ def keyboard_input():
 
 def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''
-    msg_q = multiprocessing.Queue()
+    msg_q = mp.Queue()
 
-    net = multiprocessing.Process(target=remcom,
-                                  args=(movie_filename, output_dir,
-                                        begin_time, end_time, msg_q))
+    net = mp.Process(target=remcom, args=(movie_filename, output_dir,
+                                          begin_time, end_time, msg_q))
     net.start()
     time.sleep(5)
 
