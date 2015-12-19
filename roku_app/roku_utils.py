@@ -26,14 +26,19 @@ USER = os.getenv('USER')
 
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
-    roku_ip = '192.168.1.12'
+    roku_ip = '192.168.1.162'
     if keypress == 'Wait':
         time.sleep(5)
     elif keypress == 'Gtalk':
         run_command('%s/bin/send_to_gtalk checkRoku' % HOMEDIR)
     else:
-        result = requests.post('http://%s:8060/keypress/%s' % (roku_ip,
-                                                               keypress))
+        try:
+            result = requests.post('http://%s:8060/keypress/%s' % (roku_ip,
+                                                                   keypress))
+        except requests.ConnectionError as exc:
+            return 'connection error\n%s' % exc
+        except:
+            raise
         if result.status_code != 200:
             return 'Error %d on keypress %s' % (result.status_code, keypress)
     return keypress
