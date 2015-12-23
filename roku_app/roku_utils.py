@@ -26,7 +26,9 @@ USER = os.getenv('USER')
 
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
-    roku_ip = '192.168.1.162'
+#    roku_ip = '192.168.1.165'
+#    roku_ip = 'roku-box.fios-router.home'
+    roku_ip = 'NP-1XC384040132.fios-router.home'
     if keypress == 'Wait':
         time.sleep(5)
     elif keypress == 'Gtalk':
