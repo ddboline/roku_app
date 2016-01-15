@@ -107,22 +107,22 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 def make_video(prefix='test_roku', begin_time=0):
     """ write video file, then run audio analysis on it """
     cmd_ = 'time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix + \
-            '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
-            '-oac mp3lame ' + \
-            '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
-            '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
-            '> ~/netflix/log/test.out 2>&1'
+           '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
+           '-oac mp3lame ' + \
+           '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
+           '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
+           '> ~/netflix/log/test.out 2>&1'
     run_command(cmd_)
     cmd_ = 'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
-            '--no-video ~/test.avi > /dev/null 2>&1'
+           '--no-video ~/test.avi > /dev/null 2>&1'
     run_command(cmd_)
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
     result = make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR,
                                                prefix='test')
     cmd_ = 'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
-            '-b 600 -o ~/test.mp4 >> ' + \
-            '~/netflix/log/test.out 2>&1'
+           '-b 600 -o ~/test.mp4 >> ' + \
+           '~/netflix/log/test.out 2>&1'
     run_command(cmd_)
 
     run_command('mv ~/test.mp4 ~/public_html/videos/')
