@@ -27,10 +27,10 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
         (commercials), use temp not test here...
     '''
     input_string = '%d,%d' % (begin_time, end_time)
-    remove_commercials(input_file, '%s/%s' % (output_dir,
-                                              input_file.split('/')[-1]),
+    output_file = '%s/%s' % (output_dir, input_file.split('/')[-1])
+    remove_commercials(input_file, output_file,
                        timing_string=input_string)
-    return 0
+    return output_file
 
 
 def make_video_script(input_file='', begin_time=0):
@@ -51,6 +51,22 @@ def make_video_script(input_file='', begin_time=0):
     os.remove(avifile)
     return make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
 
+
+def make_transcode_script(input_file):
+    """
+        write out transcode file at the end of the recording,
+        will be used to convert mpg to avi / mp4 later on
+    """
+    prefix = input_file.split('/')[-1].replace('.avi', '')
+    output_file = '%s/Documents/movies/%s.mp4' % (HOMEDIR, prefix)
+    with open('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
+        outfile.write('#!/bin/bash\n')
+        outfile.write('nice -n 19 HandBrakeCLI ')
+        outfile.write('-i %s -o %s ' % (input_file, output_file))
+        outfile.write('--preset "Android" ')
+        outfile.write('> ~/dvdrip/log/%s.out 2>&1\n' % prefix)
+    os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
+              '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
 
 def remcom(movie_filename, output_dir, begin_time, end_time,
            msg_q=None, socketfile=REMCOM_SOCKET_FILE):
@@ -92,8 +108,9 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                         except ValueError:
                             end_time -= 60
                     elif option == 's':
-                        remove_commercials_wrapper(movie_filename, output_dir,
-                                                   begin_time, end_time)
+                        output_file = remove_commercials_wrapper(
+                            movie_filename, output_dir, begin_time, end_time)
+                        make_transcode_script(output_file)
                         conn.send(b'done')
                         msg_q.put('q')
                         return 0
