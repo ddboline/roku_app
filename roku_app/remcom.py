@@ -68,6 +68,7 @@ def make_transcode_script(input_file):
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
               '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
 
+
 def remcom(movie_filename, output_dir, begin_time, end_time,
            msg_q=None, socketfile=REMCOM_SOCKET_FILE):
     '''
