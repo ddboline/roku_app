@@ -57,8 +57,10 @@ def make_transcode_script(input_file):
         write out transcode file at the end of the recording,
         will be used to convert mpg to avi / mp4 later on
     """
-    prefix = input_file.split('/')[-1].replace('.avi', '')
-    output_file = '%s/Documents/movies/%s.mp4' % (HOMEDIR, prefix)
+    prefix = input_file.split('/')[-1]
+    for suffix in '.avi', '.mp4', '.mkv':
+        prefix = prefix.replace(suffix, '')
+    output_file = '%s/dvdrip/avi/%s.mp4' % (HOMEDIR, prefix)
     with open('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
         outfile.write('#!/bin/bash\n')
         outfile.write('nice -n 19 HandBrakeCLI ')
