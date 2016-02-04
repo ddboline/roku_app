@@ -248,3 +248,25 @@ def play_roku():
         file_.write('kill -9 %d %d\n' % (recording_process.pid, os.getpid()))
 
     recording_process.wait()
+
+
+def open_transcode_channel():
+    import pika
+    parameters = pika.ConnectionParameters()
+    connection = pika.BlockingConnection(parameters)
+
+    channel = connection.channel()
+    channel.queue_declare(queue='transcode_work_queue', durable=True)
+
+    return channel
+
+
+def publish_transcode_job_to_queue(script):
+    import json
+    assert os.path.exists(script)
+    body = {'script': script}
+    body = json.dumps(body)
+    chan = open_transcode_channel()
+    chan.basic_publish(exchange='', routing_key='transcode_work_queue',
+                       body=body)
+    return

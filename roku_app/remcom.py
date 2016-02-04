@@ -1,10 +1,7 @@
 #!/usr/bin/python
 ''' remcom test module '''
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
-
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 import os
 import time
 from select import select
@@ -12,7 +9,8 @@ import multiprocessing as mp
 
 from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
-                         make_time_series_plot_wrapper,)
+                         make_time_series_plot_wrapper,
+                         publish_transcode_job_to_queue)
 from .util import (run_command, send_command,
                    OpenUnixSocketServer, OpenSocketConnection)
 
@@ -66,9 +64,13 @@ def make_transcode_script(input_file):
         outfile.write('nice -n 19 HandBrakeCLI ')
         outfile.write('-i %s -o %s ' % (input_file, output_file))
         outfile.write('--preset "Android" ')
-        outfile.write('> ~/dvdrip/log/%s.out 2>&1\n' % prefix)
+        outfile.write('> ~/dvdrip/log/%s_mp4.out 2>&1\n' % prefix)
+        outfile.write('mv %s ~/Documents/movies/\n' % output_file)
+        outfile.write('mv ~/dvdrip/log/%s_mp4.out ~/tmp_avi/\n' % prefix)
+
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
               '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
+    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
 
 
 def remcom(movie_filename, output_dir, begin_time, end_time,

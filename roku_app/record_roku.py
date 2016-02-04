@@ -149,12 +149,17 @@ def make_transcode_script(prefix='test_roku',
             outfile.write('-b 600 --encoder-preset ultrafast ')
             outfile.write('-o ~/netflix/avi/%s.mp4 ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
+            outfile.write('mv ~/netflix/avi/%s.mp4 ~/Documents/movies/'
+                          % prefix)
         else:
             outfile.write('nice -n 19 mencoder ')
             outfile.write('~/netflix/mpg/%s_0.mpg ' % prefix)
             outfile.write('%s -vf crop=704:467:14:11,scale=470:-2 ' % mencopts)
             outfile.write('-o ~/netflix/avi/%s.avi ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
+            outfile.write('mv ~/netflix/avi/%s.avi ~/Documents/movies/'
+                          % prefix)
+        outfile.write('mv ~/netflix/log/%s.out ~/tmp_avi/' % prefix)
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
 
 
@@ -359,6 +364,12 @@ def signal_finish(prefix='test_roku'):
         with open(KILLSCRIPT, 'a') as outfile:
             outfile.write('\n mv %s/netflix/tmp/%s.sh ' % (HOMEDIR, prefix))
             outfile.write('%s/netflix/jobs/\n' % HOMEDIR)
+            outfile.write('cd ~/setup_files/build/roku_app/ ; '
+                          'python -c "import roku_app.roku_utils ; '
+                          'roku_app.roku_utils.publish_transcode_job_to_queue('
+                          "'%s/netflix/jobs/%s.sh'" % (HOMEDIR, prefix)
+                          + ')"\n')
+
     _, _ta = make_thumb_script(prefix)
     run_command('send_to_gtalk \"%s is done %d\"' % (prefix, int(_ta)))
     return
