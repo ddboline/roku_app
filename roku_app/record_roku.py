@@ -149,7 +149,7 @@ def make_transcode_script(prefix='test_roku',
             outfile.write('-b 600 --encoder-preset ultrafast ')
             outfile.write('-o ~/netflix/avi/%s.mp4 ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
-            outfile.write('mv ~/netflix/avi/%s.mp4 ~/Documents/movies/'
+            outfile.write('mv ~/netflix/avi/%s.mp4 ~/Documents/movies/\n '
                           % prefix)
         else:
             outfile.write('nice -n 19 mencoder ')
@@ -157,9 +157,9 @@ def make_transcode_script(prefix='test_roku',
             outfile.write('%s -vf crop=704:467:14:11,scale=470:-2 ' % mencopts)
             outfile.write('-o ~/netflix/avi/%s.avi ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
-            outfile.write('mv ~/netflix/avi/%s.avi ~/Documents/movies/'
+            outfile.write('mv ~/netflix/avi/%s.avi ~/Documents/movies/\n'
                           % prefix)
-        outfile.write('mv ~/netflix/log/%s.out ~/tmp_avi/' % prefix)
+        outfile.write('mv ~/netflix/log/%s.out ~/tmp_avi/\n' % prefix)
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
 
 

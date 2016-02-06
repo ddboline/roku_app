@@ -64,7 +64,7 @@ def run_extracting(title, chapter, name, aid, sid=-1, donav=False):
                   '--stream-dump=%s/vob/%s.vob ' % (DIR, name,) + \
                   '--aid=%i --sid=%i ' % (aid, sid_val,)
     if donav:
-        command = '%s -nocache ' % command
+        command = '%s ' % command
 
     if DEBUG:
         print(title, chapter, name, aid, sid)
