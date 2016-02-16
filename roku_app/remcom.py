@@ -10,7 +10,7 @@ import multiprocessing as mp
 from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
                          make_time_series_plot_wrapper,
-                         publish_transcode_job_to_queue)
+                         publish_transcode_job_to_queue, get_random_hex_string)
 from .util import (run_command, send_command,
                    OpenUnixSocketServer, OpenSocketConnection)
 
@@ -36,9 +36,10 @@ def make_video_script(input_file='', begin_time=0):
     if not os.path.exists(input_file):
         return -1
     input_string = '%d,%d' % (begin_time, begin_time+10)
-    avifile = '%s/temp.avi' % HOMEDIR
-    mp4file = '%s/temp.mp4' % HOMEDIR
-    wavfile = '%s/temp.wav' % HOMEDIR
+    tmpfile = '%s/dvdrip/tmp/test_%06x' % (HOMEDIR, get_random_hex_string(3))
+    avifile = '%s.avi' % tmpfile
+    mp4file = '%s.mp4' % tmpfile
+    wavfile = '%s.wav' % tmpfile
     remove_commercials(infile=input_file, outfile=avifile,
                        timing_string=input_string)
     run_command('time HandBrakeCLI -i %s -f mp4 -e x264 ' % avifile +
@@ -47,7 +48,9 @@ def make_video_script(input_file='', begin_time=0):
                 '%s > /dev/null 2>&1\n' % avifile)
     run_command('mv %s %s/public_html/videos/temp.mp4\n' % (mp4file, HOMEDIR))
     os.remove(avifile)
-    return make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
+    retval = make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
+    os.remove(wavfile)
+    return retval
 
 
 def make_transcode_script(input_file):

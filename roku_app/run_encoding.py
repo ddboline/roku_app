@@ -25,7 +25,10 @@ def main_loop(channel):
         print(script)
 
         if os.path.exists(script):
-            output = check_output(['sh', script], stderr=STDOUT)
+            try:
+                output = check_output(['sh', script], stderr=STDOUT)
+            except CalledProcessError as exc:
+                print(exc)
 
             new_path = script.split('/')[-1]
             os.rename(script, '%s/tmp_avi/%s' % (HOMEDIR, new_path))
@@ -34,9 +37,6 @@ def main_loop(channel):
 def run_encoding():
     chan = open_transcode_channel()
     while True:
-        try:
-            main_loop(chan)
-        except CalledProcessError as exc:
-            print(exc)
+        main_loop(chan)
         time.sleep(1)
     return

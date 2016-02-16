@@ -16,11 +16,12 @@ from .get_dev import get_dev
 from .roku_utils import (make_audio_analysis_plots_wrapper,
                          make_time_series_plot_wrapper,
                          run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg,
-                         make_thumbnails, send_to_roku)
+                         make_thumbnails, send_to_roku, get_random_hex_string)
 from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection,)
 
 ### Global variables, immutable
 HOMEDIR = os.getenv('HOME')
+TEMPDIR = '%s/netflix/tmp'
 TESTSCRIPT = '%s/netflix/test.sh' % HOMEDIR
 KILLSCRIPT = '%s/netflix/kill_job.sh' % HOMEDIR
 GLOBAL_LIST_OF_SUBPROCESSES = []
@@ -106,26 +107,27 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
 
 def make_video(prefix='test_roku', begin_time=0):
     """ write video file, then run audio analysis on it """
+    tmpfile = '%s/netflix/tmp/test_%06x' % (HOMEDIR, get_random_hex_string(3))
     cmd_ = 'time mencoder ~/netflix/mpg/%s_0.mpg ' % prefix + \
            '-ss %s -endpos 10 -ovc lavc ' % begin_time + \
            '-oac mp3lame ' + \
            '-lavcopts vcodec=mpeg4:vbitrate=600:threads=%s ' % NCPU + \
-           '-lameopts fast:preset=medium -idx -o ~/test.avi ' + \
+           '-lameopts fast:preset=medium -idx -o %s.avi ' % tmpfile + \
            '> ~/netflix/log/test.out 2>&1'
     run_command(cmd_)
-    cmd_ = 'mpv --ao=pcm:file=%s/test.wav ' % HOMEDIR + \
-           '--no-video ~/test.avi > /dev/null 2>&1'
+    cmd_ = 'mpv --ao=pcm:file=%s.wav ' % tmpfile + \
+           '--no-video %s.avi > /dev/null 2>&1' % tmpfile
     run_command(cmd_)
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
-    result = make_audio_analysis_plots_wrapper('%s/test.wav' % HOMEDIR,
+    result = make_audio_analysis_plots_wrapper('%s.wav' % tmpfile,
                                                prefix='test')
-    cmd_ = 'time HandBrakeCLI -i ~/test.avi -f mp4 -e x264 ' + \
-           '-b 600 -o ~/test.mp4 >> ' + \
+    cmd_ = 'time HandBrakeCLI -i %s.avi -f mp4 -e x264 ' % tmpfile + \
+           '-b 600 -o %s.mp4 >> ' % tmpfile + \
            '~/netflix/log/test.out 2>&1'
     run_command(cmd_)
-
-    run_command('mv ~/test.mp4 ~/public_html/videos/')
+    run_command('mv %s.mp4 ~/public_html/videos/test.mp4' % tmpfile)
+    run_command('rm %s.*' % tmpfile)
 
     return result
 
