@@ -254,6 +254,8 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                         if os.path.exists(fname):
                             outstring = make_time_series_plot_wrapper(
                                 fname, prefix='test')
+                    elif _cmd == 'extend':
+                        msg_q.put('extend')
                     else:
                         outstring = send_to_roku([_cmd])
                     if outstring:
