@@ -73,7 +73,8 @@ def make_transcode_script(input_file):
 
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
               '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
-    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
+#    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
+    return '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
 
 
 def remcom(movie_filename, output_dir, begin_time, end_time,
