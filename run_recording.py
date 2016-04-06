@@ -26,4 +26,6 @@ if __name__ == '__main__':
         if argv[3] == 'fix_pvr':
             DO_FIX_PVR = True
 
-    record_roku(RECORDING_NAME, RECORDING_TIME, DO_FIX_PVR)
+    print(RECORDING_NAME, RECORDING_TIME, DO_FIX_PVR)
+    result = record_roku(RECORDING_NAME, RECORDING_TIME, DO_FIX_PVR)
+    print(result)
