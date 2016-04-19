@@ -11,7 +11,7 @@ from setuptools import setup
 
 setup(
     name='roku_app',
-    version='0.0.2.6',
+    version='0.0.2.7',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='roku_app',
