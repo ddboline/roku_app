@@ -12,6 +12,7 @@ from __future__ import unicode_literals
 import os
 import time
 import socket
+from contextlib import contextmanager
 from subprocess import call, Popen, PIPE
 
 HOMEDIR = os.getenv('HOME')

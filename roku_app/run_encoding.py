@@ -27,6 +27,7 @@ def main_loop(channel):
         if os.path.exists(script):
             try:
                 output = check_output(['sh', script], stderr=STDOUT)
+                print(output)
             except CalledProcessError as exc:
                 print(exc)
 
@@ -35,8 +36,8 @@ def main_loop(channel):
 
 
 def run_encoding():
-    chan = open_transcode_channel()
-    while True:
-        main_loop(chan)
-        time.sleep(1)
-    return
+    with open_transcode_channel() as chan:
+        while True:
+            main_loop(chan)
+            time.sleep(1)
+        return

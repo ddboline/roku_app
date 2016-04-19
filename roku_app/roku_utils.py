@@ -15,6 +15,7 @@ import os
 import time
 import requests
 
+from contextlib import contextmanager
 from multiprocessing import Process, Value
 from subprocess import Popen, PIPE
 
@@ -250,15 +251,19 @@ def play_roku():
     recording_process.wait()
 
 
+@contextmanager
 def open_transcode_channel():
     import pika
-    parameters = pika.ConnectionParameters()
-    connection = pika.BlockingConnection(parameters)
 
-    channel = connection.channel()
-    channel.queue_declare(queue='transcode_work_queue', durable=True)
+    try:
+        parameters = pika.ConnectionParameters()
+        connection = pika.BlockingConnection(parameters)
+        channel = connection.channel()
+        channel.queue_declare(queue='transcode_work_queue', durable=True)
 
-    return channel
+        yield channel
+    finally:
+        connection.close()
 
 
 def publish_transcode_job_to_queue(script):
@@ -266,7 +271,7 @@ def publish_transcode_job_to_queue(script):
     assert os.path.exists(script)
     body = {'script': script}
     body = json.dumps(body)
-    chan = open_transcode_channel()
-    chan.basic_publish(exchange='', routing_key='transcode_work_queue',
-                       body=body)
+    with open_transcode_channel() as chan:
+        chan.basic_publish(exchange='', routing_key='transcode_work_queue',
+                           body=body)
     return
