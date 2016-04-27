@@ -11,7 +11,7 @@ from setuptools import setup
 
 setup(
     name='roku_app',
-    version='0.0.2.7',
+    version='0.0.2.8',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='roku_app',
@@ -20,7 +20,7 @@ setup(
     install_requires=['numpy'],
     packages=['roku_app'],
     package_dir={'roku_app': 'roku_app'},
-    package_data={'roku_app': ['roku_app/templates/*.html',]},
+    package_data={'roku_app': ['roku_app/templates/*.html', ]},
     entry_points={'console_scripts':
-                  ['run-recording = roku_app.record_roku:main',]}
+                  ['run-recording = roku_app.record_roku:main', ]}
 )
