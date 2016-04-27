@@ -3,11 +3,11 @@
 from __future__ import print_function
 
 import os
-from .roku_utils import get_random_hex_string
+from .roku_utils import get_random_hex_string, publish_transcode_job_to_queue
 from .util import run_command
 
 HOMEDIR = os.getenv('HOME')
-TMPDIR = '%s/tmp_avi' % HOMEDIR
+TMPDIR = '%s/television/tmp' % HOMEDIR
 
 
 def remove_commercials(infile='', outfile='', timing_string='0,3600'):
@@ -47,9 +47,13 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600'):
     run_command('chmod a-w %s' % infile)
     run_command('mv %s %s/backup_old.avi 2> /dev/null' % (outfile, TMPDIR))
 
+    tmp_script_fname = '%s/television/jobs/%s.sh' % (HOMEDIR, temp_pre)
+    tmp_script = open(tmp_script_fname, 'w')
+
     if len(times) == 1:
         make_temp_avi(times[0], 0)
-        run_command('mv %s/%s_000.avi %s' % (TMPDIR, temp_pre, outfile))
+        tmp_script.write('#!/bin/bash\n')
+        tmp_script.write('mv %s/%s_000.avi %s\n' % (TMPDIR, temp_pre, outfile))
     else:
         index = 0
         for time in times:
@@ -61,7 +65,11 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600'):
         print(outfile, TMPDIR)
         run_command(command)
 
-    run_command('chmod u+w %s' % infile)
-    run_command('du -sh %s %s' % (infile, outfile))
-    run_command('rm %s/%s_*.avi %s/%s_*.out 2> /dev/null' % (TMPDIR, temp_pre,
-                                                             TMPDIR, temp_pre))
+    tmp_script.write('chmod u+w %s\n' % infile)
+    tmp_script.write('du -sh %s %s\n' % (infile, outfile))
+    tmp_script.write('rm %s/%s_*.avi %s/%s_*.out 2> /dev/null\n' % (TMPDIR,
+                                                                    temp_pre,
+                                                                    TMPDIR,
+                                                                    temp_pre))
+    tmp_script.close()
+    publish_transcode_job_to_queue(tmp_script_fname)

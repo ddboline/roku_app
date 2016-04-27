@@ -2,6 +2,7 @@
 ''' remcom test module '''
 from __future__ import (absolute_import, division, print_function,
                         unicode_literals)
+import argparse
 import os
 import time
 from select import select
@@ -11,11 +12,12 @@ from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
                          make_time_series_plot_wrapper,
                          publish_transcode_job_to_queue, get_random_hex_string)
-from .util import (run_command, send_command,
-                   OpenUnixSocketServer, OpenSocketConnection)
+from .util import (run_command, send_command, OpenUnixSocketServer,
+                   OpenSocketConnection, HOMEDIR)
 
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
-HOMEDIR = os.getenv('HOME')
+INPUT_DIR = '%s/Documents/movies' % HOMEDIR
+OUTPUT_DIR = '/media/dileptonnas'
 
 
 def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
@@ -73,7 +75,6 @@ def make_transcode_script(input_file):
 
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
               '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
-#    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
     return '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
 
 
@@ -193,3 +194,106 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
             break
         time.sleep(0.1)
     net.join(10)
+
+
+def remcom_test_main():
+    parser = argparse.ArgumentParser(description='remcom_test script')
+    parser.add_argument('files', nargs='*', help='remcom_test files')
+    parser.add_argument('-d', '--directory', type=str,
+                        help='specify directory (must be in Documents/movies)')
+    parser.add_argument('-u', '--unwatched', action='store_true',
+                        help='copy to television/unwatched')
+    args = parser.parse_args()
+
+    directory = getattr(args, 'directory', None)
+    unwatched = getattr(args, 'unwatched', False)
+    files = getattr(args, 'files', [])
+    if directory:
+        if not os.path.exists(
+                '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
+            raise Exception('bad directory')
+        for fname in files:
+            if fname.endswith('.mp4'):
+                continue
+            input_filename = '%s/%s' % (INPUT_DIR, fname)
+            mp4_filename = fname.replace('.avi', '.mp4')
+            prefix = input_filename.split('/')[-1]
+            for suffix in '.avi', '.mp4', '.mkv':
+                prefix = prefix.replace(suffix, '')
+            mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+            output_directory = '%s/Documents/movies/' % (OUTPUT_DIR, directory)
+            remcom_main(input_filename, output_directory, 0, 0)
+            if not os.path.exists(mp4_script):
+                print('something bad happened %s' % input_filename)
+                exit(0)
+            with open(mp4_script, 'a') as inpf:
+                inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
+                           '%s/\n' % (HOMEDIR, mp4_filename, OUTPUT_DIR,
+                                      directory))
+                inpf.write('mv %s/Documents/movies/%s/%s %s/'
+                           'Documents/movies/\n' % (OUTPUT_DIR, directory,
+                                                    fname, HOMEDIR))
+                inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
+                inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
+                           % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+            publish_transcode_job_to_queue(mp4_script)
+    elif unwatched:
+        for fname in files:
+            if fname.endswith('.mp4'):
+                continue
+            input_filename = '%s/%s' % (INPUT_DIR, fname)
+            mp4_filename = fname.replace('.avi', '.mp4')
+            prefix = input_filename.split('/')[-1]
+            for suffix in '.avi', '.mp4', '.mkv':
+                prefix = prefix.replace(suffix, '')
+            mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+            output_directory = '%s/television/unwatched' % OUTPUT_DIR
+            remcom_main(input_filename, output_directory, 0, 0)
+            if not os.path.exists(mp4_script):
+                print('something bad happened %s' % input_filename)
+                exit(0)
+            with open(mp4_script, 'a') as inpf:
+                inpf.write('cp %s/Documents/movies/%s %s/'
+                           'television/unwatched/\n' % (HOMEDIR, mp4_filename,
+                                                        OUTPUT_DIR))
+                inpf.write('mv %s/television/unwatched/%s %s/'
+                           'Documents/movies/\n' % (OUTPUT_DIR, fname,
+                                                    HOMEDIR))
+                inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
+                inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
+                           % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+            publish_transcode_job_to_queue(mp4_script)
+    else:
+        for fname in files:
+            if fname.endswith('.mp4'):
+                continue
+            tmp = fname.split('.')[0].split('_')
+            show = '_'.join(tmp[:-2])
+            season = int(tmp[-2].strip('s'))
+            episode = int(tmp[-1].strip('ep'))
+
+            prefix = '%s_s%02d_ep%02d' % (show, season, episode)
+            output_dir = '%s/Documents/movies/%s/season%d' % (
+                OUTPUT_DIR, show, season)
+            inavifile = '%s/Documents/movies/%s.avi' % (
+                HOMEDIR, prefix)
+            mp4_script = '%s/dvdrip/jobs/%s.sh' % (
+                HOMEDIR, prefix)
+            avifile = '%s/%s.avi' % (
+                output_dir, prefix)
+            mp4file = '%s/Documents/movies/%s.mp4' % (
+                HOMEDIR, prefix)
+            mp4file_final = '%s/%s.mp4' % (
+                output_dir, prefix)
+            remcom_main(inavifile, output_dir, 0, 0)
+            if not os.path.exists(mp4_script):
+                print('something bad happened %s' % input_filename)
+                exit(0)
+            with open(mp4_script, 'a') as inpf:
+                inpf.write('mkdir -p %s\n' % output_dir)
+                inpf.write('cp %s %s/\n' % (mp4file, mp4file_final))
+                inpf.write('mv %s %s/Documents/movies/\n' % (avifile, HOMEDIR))
+                inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
+                inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
+                                                           mp4file_final))
+            publish_transcode_job_to_queue(mp4_script)
