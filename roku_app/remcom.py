@@ -29,7 +29,7 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
     input_string = '%d,%d' % (begin_time, end_time)
     output_file = '%s/%s' % (output_dir, input_file.split('/')[-1])
     remove_commercials(input_file, output_file,
-                       timing_string=input_string)
+                       timing_string=input_string, do_async=True)
     return output_file
 
 
@@ -125,9 +125,8 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                         msg_q.put('q')
                         return 0
                     elif option == 'v':
-                        outstring.append(
-                            '%s' % make_video_script(movie_filename,
-                                                     begin_time=end_time))
+                        outstring.append('%s' % make_video_script(
+                            movie_filename, begin_time=end_time))
                     elif option == 't':
                         outstring.append(
                             make_time_series_plot_wrapper(movie_filename))

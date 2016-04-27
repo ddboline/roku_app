@@ -3,6 +3,7 @@
 from __future__ import print_function
 
 import os
+from subprocess import check_output, STDOUT, CalledProcessError
 from .roku_utils import get_random_hex_string, publish_transcode_job_to_queue
 from .util import run_command
 
@@ -10,7 +11,8 @@ HOMEDIR = os.getenv('HOME')
 TMPDIR = '%s/television/tmp' % HOMEDIR
 
 
-def remove_commercials(infile='', outfile='', timing_string='0,3600'):
+def remove_commercials(infile='', outfile='', timing_string='0,3600',
+                       do_async=False):
     '''
         cut and splice recorded file to remove undesired sections (commercials)
     '''
@@ -72,4 +74,13 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600'):
                                                                     TMPDIR,
                                                                     temp_pre))
     tmp_script.close()
-    publish_transcode_job_to_queue(tmp_script_fname)
+    if do_async:
+        publish_transcode_job_to_queue(tmp_script_fname)
+    else:
+        try:
+            output = check_output(['sh', tmp_script_fname], stderr=STDOUT)
+            print(output)
+        except CalledProcessError as exc:
+            print(exc)
+
+        os.remove(tmp_script_fname)
