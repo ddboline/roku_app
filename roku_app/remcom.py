@@ -187,9 +187,8 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
             option = msg_q.get()
             print('got message %s' % option)
         if option == 'q':
-            run_command('kill -9 %d %d 2>&1 > /dev/null' % (net.pid,
-                                                            os.getpid()))
-            print('killing %d %d' % (net.pid, os.getpid()))
+            run_command('kill -9 %d 2>&1 > /dev/null' % (net.pid,))
+            print('killing %d' % (net.pid,))
             break
         time.sleep(0.1)
     net.join(10)
@@ -207,6 +206,7 @@ def remcom_test_main():
     directory = getattr(args, 'directory', None)
     unwatched = getattr(args, 'unwatched', False)
     files = getattr(args, 'files', [])
+    print(files)
     if directory:
         if not os.path.exists(
                 '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
@@ -290,7 +290,7 @@ def remcom_test_main():
                 exit(0)
             with open(mp4_script, 'a') as inpf:
                 inpf.write('mkdir -p %s\n' % output_dir)
-                inpf.write('cp %s %s/\n' % (mp4file, mp4file_final))
+                inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
                 inpf.write('mv %s %s/Documents/movies/\n' % (avifile, HOMEDIR))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
                 inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
