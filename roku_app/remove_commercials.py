@@ -45,6 +45,7 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
         elif len(items) > 2:
             times.append([float(items[0]), float(items[1]), float(items[2])])
 
+    outdir = os.path.dirname(outfile)
     run_command('mkdir -p %s' % TMPDIR)
     run_command('chmod a-w %s' % infile)
     run_command('mv %s %s/backup_old.avi 2> /dev/null' % (outfile, TMPDIR))
@@ -55,6 +56,7 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
     if len(times) == 1:
         make_temp_avi(times[0], 0)
         tmp_script.write('#!/bin/bash\n')
+        tmp_script.write('mkdir -p %s' % outdir)
         tmp_script.write('mv %s/%s_000.avi %s\n' % (TMPDIR, temp_pre, outfile))
     else:
         index = 0

@@ -27,7 +27,7 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
         (commercials), use temp not test here...
     '''
     input_string = '%d,%d' % (begin_time, end_time)
-    output_file = '%s/%s' % (output_dir, input_file.split('/')[-1])
+    output_file = '%s/%s' % (output_dir, os.path.basename(input_file))
     remove_commercials(input_file, output_file,
                        timing_string=input_string, do_async=True)
     return output_file
@@ -60,7 +60,7 @@ def make_transcode_script(input_file):
         write out transcode file at the end of the recording,
         will be used to convert mpg to avi / mp4 later on
     """
-    prefix = input_file.split('/')[-1]
+    prefix = os.path.basename(input_file)
     for suffix in '.avi', '.mp4', '.mkv':
         prefix = prefix.replace(suffix, '')
     output_file = '%s/dvdrip/avi/%s.mp4' % (HOMEDIR, prefix)
@@ -137,7 +137,7 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                         except ValueError:
                             continue
                 outstring.append(
-                    '%s %s %s %s' % (movie_filename.split('/')[-1],
+                    '%s %s %s %s' % (os.path.basename(movie_filename),
                                      '/'.join(output_dir.split('/')[-2:]),
                                      begin_time, end_time))
                 tmp_begin = make_thumbnails(input_file=movie_filename,
@@ -216,7 +216,7 @@ def remcom_test_main():
                 continue
             input_filename = '%s/%s' % (INPUT_DIR, fname)
             mp4_filename = fname.replace('.avi', '.mp4')
-            prefix = input_filename.split('/')[-1]
+            prefix = os.path.basename(input_filename)
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
             mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
@@ -246,8 +246,8 @@ def remcom_test_main():
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
             mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
-            output_directory = '%s/television/unwatched' % OUTPUT_DIR
-            remcom_main(input_filename, output_directory, 0, 0)
+            output_dir = '%s/television/unwatched' % OUTPUT_DIR
+            remcom_main(input_filename, output_dir, 0, 0)
             if not os.path.exists(mp4_script):
                 print('something bad happened %s' % input_filename)
                 exit(0)
@@ -259,8 +259,8 @@ def remcom_test_main():
                            'Documents/movies/\n' % (OUTPUT_DIR, fname,
                                                     HOMEDIR))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
-                inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
-                           % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+                inpf.write('%s/bin/make_queue add %s/%s\n'
+                           % (HOMEDIR, output_dir, mp4_filename))
             publish_transcode_job_to_queue(mp4_script)
     else:
         for fname in files:
@@ -272,7 +272,7 @@ def remcom_test_main():
             episode = int(tmp[-1].strip('ep'))
 
             prefix = '%s_s%02d_ep%02d' % (show, season, episode)
-            output_dir = '%s/Documents/movies/%s/season%d' % (
+            output_dir = '%s/Documents/television/%s/season%d' % (
                 OUTPUT_DIR, show, season)
             inavifile = '%s/Documents/movies/%s.avi' % (
                 HOMEDIR, prefix)
