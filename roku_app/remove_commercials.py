@@ -78,6 +78,7 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
     tmp_script.close()
     if do_async:
         publish_transcode_job_to_queue(tmp_script_fname)
+        return tmp_script_fname
     else:
         try:
             output = check_output(['sh', tmp_script_fname], stderr=STDOUT)
@@ -86,3 +87,4 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
             print(exc)
 
         os.remove(tmp_script_fname)
+        return None

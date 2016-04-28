@@ -252,26 +252,27 @@ def play_roku():
 
 
 @contextmanager
-def open_transcode_channel():
+def open_transcode_channel(queue='transcode_work_queue'):
     import pika
 
     try:
         parameters = pika.ConnectionParameters()
         connection = pika.BlockingConnection(parameters)
         channel = connection.channel()
-        channel.queue_declare(queue='transcode_work_queue', durable=True)
+        channel.queue_declare(queue=queue, durable=True)
 
         yield channel
     finally:
         connection.close()
 
 
-def publish_transcode_job_to_queue(script):
+def publish_transcode_job_to_queue(script, queue='transcode_work_queue',
+                                   routing_key='transcode_work_queue'):
     import json
     assert os.path.exists(script)
     body = {'script': script}
     body = json.dumps(body)
-    with open_transcode_channel() as chan:
-        chan.basic_publish(exchange='', routing_key='transcode_work_queue',
+    with open_transcode_channel(queue=queue) as chan:
+        chan.basic_publish(exchange='', routing_key=routing_key,
                            body=body)
     return
