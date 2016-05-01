@@ -7,6 +7,7 @@ import os
 import time
 from select import select
 import multiprocessing as mp
+from nose.tools import nottest
 
 from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
@@ -194,6 +195,7 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
     net.join(10)
 
 
+@nottest
 def remcom_test_main():
     parser = argparse.ArgumentParser(description='remcom_test script')
     parser.add_argument('files', nargs='*', help='remcom_test files')
@@ -206,7 +208,6 @@ def remcom_test_main():
     directory = getattr(args, 'directory', None)
     unwatched = getattr(args, 'unwatched', False)
     files = getattr(args, 'files', [])
-    print(files)
     if directory:
         if not os.path.exists(
                 '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):

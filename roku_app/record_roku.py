@@ -31,26 +31,23 @@ NCPU = cpu_count()
 def list_running_recordings(devname='/dev/video0'):
     """ list any currently running recordings """
     pids = []
-    _cmd = 'fuser -a %s 2> /dev/null' % devname
-    with run_command(_cmd, do_popen=True) as pop_:
-        for line in pop_:
-            try:
-                pids.append(int(line.strip()))
-            except ValueError:
-                pass
+    parents = []
+    lines = []
     with run_command('ps -eF 2> /dev/null', do_popen=True) as pop_:
         for line in pop_:
+            lines.append(line)
+    for line in lines:
+        if devname in line:
             ents = line.strip().split()
-            try:
-                pid = int(ents[1])
-                ppid = int(ents[2])
-                if pid in pids or ppid in pids:
-                    if pid not in pids:
-                        pids.append(pid)
-                    if ppid not in pids:
-                        pids.append(ppid)
-            except ValueError:
-                continue
+            pids.append(int(ents[1]))
+            parents.append(int(ents[2]))
+    for line in lines:
+        if 'run_recording' in line:
+            ents = line.strip().split()
+            pid = int(ents[1])
+            parent = int(ents[2])
+            if pid in parents or parent in parents:
+                pids.append(pid)
     return pids
 
 
