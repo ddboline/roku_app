@@ -287,7 +287,7 @@ def remcom_test_main():
                 output_dir, prefix)
             remcom_main(inavifile, output_dir, 0, 0)
             if not os.path.exists(mp4_script):
-                print('something bad happened %s' % input_filename)
+                print('something bad happened %s' % prefix)
                 exit(0)
             with open(mp4_script, 'a') as inpf:
                 inpf.write('mkdir -p %s\n' % output_dir)
