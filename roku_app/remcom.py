@@ -50,6 +50,8 @@ def make_video_script(input_file='', begin_time=0):
     run_command('mpv --ao=pcm:file=%s --no-video ' % wavfile +
                 '%s > /dev/null 2>&1\n' % avifile)
     run_command('mv %s %s/public_html/videos/temp.mp4\n' % (mp4file, HOMEDIR))
+    run_command('du -sh %s %s/public_html/videos/temp.mp4\n' % (input_file,
+                                                                HOMEDIR))
     os.remove(avifile)
     retval = make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
     os.remove(wavfile)
