@@ -208,3 +208,9 @@ def test_convert_date():
                                  month=out_date.month,
                                  day=out_date.day)
     assert out_date == datetime.date(1980, 11, 17)
+
+
+def get_random_hex_string(nbytes):
+    ''' use os.urandom to create n byte random string, output integer '''
+    from binascii import b2a_hex
+    return int(b2a_hex(os.urandom(nbytes)), 16)

@@ -19,7 +19,7 @@ from contextlib import contextmanager
 from multiprocessing import Process, Value
 from subprocess import Popen, PIPE
 
-from .util import run_command, send_command
+from .util import run_command, send_command, get_random_hex_string
 
 HOMEDIR = os.getenv('HOME')
 USER = os.getenv('USER')
@@ -135,12 +135,6 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
             except ValueError:
                 nsecs = -1
     return nsecs
-
-
-def get_random_hex_string(nbytes):
-    ''' use os.urandom to create n byte random string, output integer '''
-    from binascii import b2a_hex
-    return int(b2a_hex(os.urandom(nbytes)), 16)
 
 
 def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
