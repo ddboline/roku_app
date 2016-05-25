@@ -193,6 +193,8 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
             run_command('kill -9 %d 2>&1 > /dev/null' % (net.pid,))
             print('killing %d' % (net.pid,))
             break
+        if not net.is_alive():
+            break
         time.sleep(0.1)
     net.join(10)
 
@@ -223,7 +225,8 @@ def remcom_test_main():
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
             mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
-            output_directory = '%s/Documents/movies/' % (OUTPUT_DIR, directory)
+            output_directory = '%s/Documents/movies/%s' % (OUTPUT_DIR,
+                                                           directory)
             remcom_main(input_filename, output_directory, 0, 0)
             if not os.path.exists(mp4_script):
                 print('something bad happened %s' % input_filename)
