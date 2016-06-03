@@ -19,8 +19,11 @@ if __name__ == '__main__':
     for arg in os.sys.argv:
         if 'transcode_avi' in arg:
             continue
-        elif os.path.exists(arg):
-            fname = arg
+        elif os.path.exists(os.path.abspath(arg)):
+            fname = os.path.abspath(arg)
+        elif os.path.exists('%s/Documents/movies/%s' % (os.getenv('HOME'),
+                                                        arg)):
+            fname = '%s/Documents/movies/%s' % (os.getenv('HOME'), arg)
         elif arg == 'add':
             do_add = True
     if not fname:
