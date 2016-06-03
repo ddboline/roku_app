@@ -217,8 +217,6 @@ def remcom_test_main():
                 '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
             raise Exception('bad directory')
         for fname in files:
-            if fname.endswith('.mp4'):
-                continue
             input_filename = '%s/%s' % (INPUT_DIR, fname)
             mp4_filename = fname.replace('.avi', '.mp4')
             prefix = os.path.basename(input_filename)
@@ -227,6 +225,22 @@ def remcom_test_main():
             mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
             output_directory = '%s/Documents/movies/%s' % (OUTPUT_DIR,
                                                            directory)
+
+            if not os.path.exists(input_filename):
+                continue
+
+            if fname.endswith('.mp4'):
+                mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+                with open(mp4_script, 'w') as inpf:
+                    inpf.write('#!/bin/bash\n')
+                    inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
+                               '%s/\n' % (HOMEDIR, fname, OUTPUT_DIR,
+                                          directory))
+                    inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
+                               % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+                publish_transcode_job_to_queue(mp4_script)
+                continue
+
             remcom_main(input_filename, output_directory, 0, 0)
             if not os.path.exists(mp4_script):
                 print('something bad happened %s' % input_filename)
@@ -244,8 +258,6 @@ def remcom_test_main():
             publish_transcode_job_to_queue(mp4_script)
     elif unwatched:
         for fname in files:
-            if fname.endswith('.mp4'):
-                continue
             input_filename = '%s/%s' % (INPUT_DIR, fname)
             mp4_filename = fname.replace('.avi', '.mp4')
             prefix = input_filename.split('/')[-1]
@@ -253,6 +265,20 @@ def remcom_test_main():
                 prefix = prefix.replace(suffix, '')
             mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
             output_dir = '%s/television/unwatched' % OUTPUT_DIR
+
+            if not os.path.exists(input_filename):
+                continue
+            if fname.endswith('.mp4'):
+                with open(mp4_script, 'w') as inpf:
+                    inpf.write('#!/bin/bash\n')
+                    inpf.write('cp %s/Documents/movies/%s %s/'
+                               'television/unwatched/\n' % (HOMEDIR, fname,
+                                                            OUTPUT_DIR))
+                    inpf.write('%s/bin/make_queue add %s/%s\n'
+                               % (HOMEDIR, output_dir, mp4_filename))
+                publish_transcode_job_to_queue(mp4_script)
+                continue
+
             remcom_main(input_filename, output_dir, 0, 0)
             if not os.path.exists(mp4_script):
                 print('something bad happened %s' % input_filename)
@@ -270,8 +296,6 @@ def remcom_test_main():
             publish_transcode_job_to_queue(mp4_script)
     else:
         for fname in files:
-            if fname.endswith('.mp4'):
-                continue
             tmp = fname.split('.')[0].split('_')
             show = '_'.join(tmp[:-2])
             season = int(tmp[-2].strip('s'))
@@ -290,6 +314,17 @@ def remcom_test_main():
                 HOMEDIR, prefix)
             mp4file_final = '%s/%s.mp4' % (
                 output_dir, prefix)
+
+            if fname.endswith('.mp4'):
+                with open(mp4_script, 'w') as inpf:
+                    inpf.write('#!/bin/bash\n')
+                    inpf.write('mkdir -p %s\n' % output_dir)
+                    inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
+                    inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
+                                                            mp4file_final))
+                publish_transcode_job_to_queue(mp4_script)
+                continue
+
             remcom_main(inavifile, output_dir, 0, 0)
             if not os.path.exists(mp4_script):
                 print('something bad happened %s' % prefix)
