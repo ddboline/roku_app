@@ -24,6 +24,7 @@ def make_encoding_file(name):
         outfile.write('nice -n 19 HandBrakeCLI ')
         outfile.write('-i %s -o %s ' % (input_file, output_file))
         outfile.write('--preset "Android" ')
+        outfile.write('--subtitle-burned ')
         outfile.write('> ~/dvdrip/log/%s_dvd.out 2>&1\n' % name)
         outfile.write('mv %s ~/tmp_avi/\n' % input_file)
         outfile.write('mv ~/dvdrip/log/%s_dvd.out ~/tmp_avi/\n' % name)
