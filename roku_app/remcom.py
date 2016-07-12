@@ -332,7 +332,8 @@ def remcom_test_main():
             with open(mp4_script, 'a') as inpf:
                 inpf.write('mkdir -p %s\n' % output_dir)
                 inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
-                inpf.write('mv %s %s/Documents/movies/\n' % (avifile, HOMEDIR))
+                inpf.write('mv %s %s/Documents/movies/%s.avi.old\n' % (
+                    avifile, prefix, HOMEDIR))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
                 inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
                                                            mp4file_final))
