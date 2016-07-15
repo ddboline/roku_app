@@ -21,19 +21,6 @@ INPUT_DIR = '%s/Documents/movies' % HOMEDIR
 OUTPUT_DIR = '/media/dileptonnas'
 
 
-def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
-                               end_time=0):
-    '''
-        cut and splice recorded file to remove undesired sections
-        (commercials), use temp not test here...
-    '''
-    input_string = '%d,%d' % (begin_time, end_time)
-    output_file = '%s/%s' % (output_dir, os.path.basename(input_file))
-    remove_commercials(input_file, output_file,
-                       timing_string=input_string, do_async=True)
-    return output_file
-
-
 def make_video_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
     if not os.path.exists(input_file):
@@ -81,6 +68,20 @@ def make_transcode_script(input_file):
     return '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
 
 
+def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
+                               end_time=0):
+    '''
+        cut and splice recorded file to remove undesired sections
+        (commercials), use temp not test here...
+    '''
+    input_string = '%d,%d' % (begin_time, end_time)
+    output_file = '%s/%s' % (output_dir, os.path.basename(input_file))
+    remove_commercials(input_file, output_file,
+                       timing_string=input_string, do_async=True)
+    transcode_script = make_transcode_script(output_file)
+    return output_file
+
+
 def remcom(movie_filename, output_dir, begin_time, end_time,
            msg_q=None, socketfile=REMCOM_SOCKET_FILE):
     '''
@@ -123,7 +124,6 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                     elif option == 's':
                         output_file = remove_commercials_wrapper(
                             movie_filename, output_dir, begin_time, end_time)
-                        make_transcode_script(output_file)
                         conn.send(b'done')
                         msg_q.put('q')
                         return 0
@@ -332,8 +332,8 @@ def remcom_test_main():
             with open(mp4_script, 'a') as inpf:
                 inpf.write('mkdir -p %s\n' % output_dir)
                 inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
-                inpf.write('mv %s %s/Documents/movies/%s.avi.old\n' % (
-                    avifile, prefix, HOMEDIR))
+                inpf.write('mv %s %s/Documents/movies/%s.old.avi\n' % (
+                    avifile, HOMEDIR, prefix))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
                 inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
                                                            mp4file_final))
