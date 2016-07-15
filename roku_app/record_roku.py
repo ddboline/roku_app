@@ -124,6 +124,8 @@ def make_video(prefix='test_roku', begin_time=0):
            '~/netflix/log/test.out 2>&1'
     run_command(cmd_)
     run_command('mv %s.mp4 ~/public_html/videos/test.mp4' % tmpfile)
+    run_command('cp ~/public_html/videos/test.mp4 '
+                '~/public_html/videos/AAAAAAA/')
     run_command('rm %s.*' % tmpfile)
 
     return result
