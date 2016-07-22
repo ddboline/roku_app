@@ -66,8 +66,8 @@ def make_transcode_script(input_file):
         outfile.write('mv ~/dvdrip/log/%s_mp4.out ~/tmp_avi/\n' % prefix)
 
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
-              '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix))
-    return '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+              '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix))
+    return '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
 
 
 def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
@@ -224,7 +224,7 @@ def remcom_test_main():
             prefix = os.path.basename(input_filename)
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
-            mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+            mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
             output_directory = '%s/Documents/movies/%s' % (OUTPUT_DIR,
                                                            directory)
 
@@ -232,7 +232,7 @@ def remcom_test_main():
                 continue
 
             if fname.endswith('.mp4'):
-                mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+                mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
                 with open(mp4_script, 'w') as inpf:
                     inpf.write('#!/bin/bash\n')
                     inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
@@ -265,7 +265,7 @@ def remcom_test_main():
             prefix = input_filename.split('/')[-1]
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
-            mp4_script = '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, prefix)
+            mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
             output_dir = '%s/television/unwatched' % OUTPUT_DIR
 
             if not os.path.exists(input_filename):
@@ -308,7 +308,7 @@ def remcom_test_main():
                 OUTPUT_DIR, show, season)
             inavifile = '%s/Documents/movies/%s.avi' % (
                 HOMEDIR, prefix)
-            mp4_script = '%s/dvdrip/jobs/%s.sh' % (
+            mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (
                 HOMEDIR, prefix)
             avifile = '%s/%s.avi' % (
                 output_dir, prefix)

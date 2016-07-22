@@ -142,7 +142,9 @@ def make_transcode_script(prefix='test_roku',
                '-lavcopts vcodec=mpeg4:vbitrate=%s:' % bitrate +\
                'threads=%s -lameopts fast:preset=medium -idx' % NCPU
 
-    with open('%s/netflix/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
+    outfile = '%s/netflix/tmp/%s.sh' % (HOMEDIR, prefix)
+
+    with open(outfile, 'w') as outfile:
         outfile.write('#!/bin/bash\n')
         if use_handbrake_for_transcode:
             outfile.write('nice -n 19 HandBrakeCLI ')
@@ -162,6 +164,7 @@ def make_transcode_script(prefix='test_roku',
                           % prefix)
         outfile.write('mv ~/netflix/log/%s.out ~/tmp_avi/\n' % prefix)
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
+    return outfile
 
 
 def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,

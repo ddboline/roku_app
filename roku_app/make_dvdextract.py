@@ -30,8 +30,9 @@ def make_encoding_file(name):
         outfile.write('mv ~/dvdrip/log/%s_dvd.out ~/tmp_avi/\n' % name)
         outfile.write('mv %s ~/Documents/movies/\n' % output_file)
     os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, name),
-              '%s/dvdrip/jobs/%s.sh' % (HOMEDIR, name))
-    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s.sh' % (HOMEDIR, name))
+              '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, name))
+    publish_transcode_job_to_queue('%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, name))
+    return '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, name)
 
 
 def read_dvd():
