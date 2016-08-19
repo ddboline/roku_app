@@ -25,7 +25,8 @@ your browser does not support the video tag
 <button type="submit" onclick="processTestRunData();"> Video </button>
 <button type="submit" onclick="processButtonDataNonThumb('time');"> TimeSeries </button>
 <button type="submit" onclick="processButtonDataNonThumb('q');"> Kill </button>
-<button type="submit" onclick="updateImageRoku();updateVideoRoku();send_command_roku('output');"> Update </button>
+<button type="submit" onclick="updateImageRoku();send_command_roku('output');"> Update Image </button>
+<button type="submit" onclick="updateImageRoku();updateVideoRoku();send_command_roku('output');"> Update Video </button>
 <br><br>
 <input type="text" name="cmd" id="roku_cmd"/>
 <button type="submit" name="submitROKU" onclick="processFormData();"> Submit </button>
@@ -131,12 +132,16 @@ your browser does not support the video tag
         document.getElementById("rokuinput").innerHTML = value;
         send_command_roku( value );
         setTimeout("send_command_roku('output');", 5*1000);
-        setTimeout("updateImageRoku();", 5*1000);
+        setTimeout("updateImageRoku();", 7*1000);
         setTimeout("send_command_roku('output');", 10*1000);
     }
     function processButtonDataNonThumb( value ) {
-        processButtonDataWait( value );
+        document.getElementById("rokuinput").innerHTML = value;
+        send_command_roku( value );
+//         setTimeout("send_command_roku('output');", 5*1000);
         setTimeout("send_command_roku('thumb');",5*1000);
+        setTimeout("updateImageRoku();", 7*1000);
+        setTimeout("send_command_roku('output');", 10*1000);
     }
     function processFormData() {
         var roku_cmd = document.getElementById( 'roku_cmd' ).value;
