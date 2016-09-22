@@ -80,7 +80,7 @@ def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
     output_file = '%s/%s' % (output_dir, os.path.basename(input_file))
     remove_commercials(input_file, output_file,
                        timing_string=input_string, do_async=True)
-    transcode_script = make_transcode_script(output_file)
+    make_transcode_script(output_file)
     return output_file
 
 
@@ -124,8 +124,8 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                         except ValueError:
                             end_time -= 60
                     elif option == 's':
-                        output_file = remove_commercials_wrapper(
-                            movie_filename, output_dir, begin_time, end_time)
+                        remove_commercials_wrapper(movie_filename, output_dir,
+                                                   begin_time, end_time)
                         conn.send(b'done')
                         msg_q.put('q')
                         return 0
@@ -238,8 +238,9 @@ def remcom_test_main():
                     inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
                                '%s/\n' % (HOMEDIR, fname, OUTPUT_DIR,
                                           directory))
-                    inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
-                               % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+                    inpf.write(
+                        '%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
+                        % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
                 publish_transcode_job_to_queue(mp4_script)
                 continue
 
@@ -289,6 +290,10 @@ def remcom_test_main():
                 inpf.write('cp %s/Documents/movies/%s %s/'
                            'television/unwatched/\n' % (HOMEDIR, mp4_filename,
                                                         OUTPUT_DIR))
+                inpf.write(
+                    'mv %s/Documents/movies/%s %s/Documents/movies/%s\n'
+                    % (HOMEDIR, fname, HOMEDIR, fname.replace('.avi',
+                                                              '.old.avi')))
                 inpf.write('mv %s/television/unwatched/%s %s/'
                            'Documents/movies/\n' % (OUTPUT_DIR, fname,
                                                     HOMEDIR))
@@ -322,8 +327,8 @@ def remcom_test_main():
                     inpf.write('#!/bin/bash\n')
                     inpf.write('mkdir -p %s\n' % output_dir)
                     inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
-                    inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
-                                                            mp4file_final))
+                    inpf.write('%s/bin/make_queue add %s\n'
+                               % (HOMEDIR, mp4file_final))
                 publish_transcode_job_to_queue(mp4_script)
                 continue
 
