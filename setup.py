@@ -17,7 +17,6 @@ setup(
     description='roku_app',
     long_description='Roku Recording App',
     license='MIT',
-    install_requires=['numpy'],
     packages=['roku_app'],
     package_dir={'roku_app': 'roku_app'},
     package_data={'roku_app': ['roku_app/templates/*.html', ]},
