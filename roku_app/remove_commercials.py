@@ -89,3 +89,15 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
 
         os.remove(tmp_script_fname)
         return None
+
+
+def main():
+    INFILE = os.sys.argv[1]
+    OUTFILE = INFILE.split('/')[-1]
+    if len(os.sys.argv) > 2:
+        OUTFILE = os.sys.argv[2]
+    if len(os.sys.argv) > 3:
+        TIMING_FILENAME = os.sys.argv[3]
+    TIMING_STRING = open(TIMING_FILENAME, 'r').read()
+
+    remove_commercials(INFILE, OUTFILE, TIMING_STRING)
