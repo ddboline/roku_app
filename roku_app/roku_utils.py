@@ -270,3 +270,20 @@ def publish_transcode_job_to_queue(script, queue='transcode_work_queue',
         chan.basic_publish(exchange='', routing_key=routing_key,
                            body=body)
     return
+
+
+def send_to_roku_main():
+    HOSTNAME = os.uname()[1]
+    REMOTEHOST = 'ddbolineathome.mooo.com'
+    USER = 'ddboline'
+
+    if HOSTNAME != 'dilepton-tower':
+        SCRIPT_DIR = '%s/setup_files/build/roku_app/' % HOMEDIR
+        CMD = 'python %s/send_to_roku.py' % SCRIPT_DIR
+        for arg in os.sys.argv[1:]:
+            CMD = '%s %s' % (CMD, arg)
+        run_command('ssh %s@%s \"%s\"' % (USER, REMOTEHOST, CMD))
+    else:
+        RETVAL = send_to_roku(os.sys.argv[1:])
+        if len(RETVAL) > 0 and 'command' not in RETVAL:
+            print(RETVAL.strip())

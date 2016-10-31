@@ -21,8 +21,10 @@ setup(
     package_dir={'roku_app': 'roku_app'},
     package_data={'roku_app': ['roku_app/templates/*.html', ]},
     entry_points={'console_scripts':
-                  ['run-recording = roku_app.record_roku:main', 
+                  ['run-recording = roku_app.record_roku:main',
                    'run-remcom-test = roku_app.remcom:remcom_test_main',
                    'run-remove-commercials = roku_app.remove_commercials:main',
-                   'play-roku = roku_app.roku_utils:play_roku']}
+                   'play-roku = roku_app.roku_utils:play_roku',
+                   'send-to-roku = roku_app.roku_utils:send_to_roku_main',
+                   'transcode-avi = roku_app.remcom:transcode_main']}
 )
