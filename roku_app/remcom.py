@@ -352,7 +352,7 @@ def transcode_main():
     fnames = []
     do_add = False
     for arg in os.sys.argv:
-        if 'transcode_avi' in arg:
+        if 'transcode_avi' in arg or 'transcode-avi' in arg:
             continue
         elif os.path.exists(os.path.abspath(arg)):
             fnames.append(os.path.abspath(arg))
