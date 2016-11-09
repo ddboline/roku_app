@@ -192,7 +192,7 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                             run_command('sh %s ; rm %s' % (KILLSCRIPT,
                                                            KILLSCRIPT))
                         return 0
-                    elif arg == 'output':
+                    else:
                         ### output command: dump first msg_q to socket
                         if msg_q:
                             if not msg_q.empty():
@@ -200,7 +200,6 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                                 if temp:
                                     last_output_message = temp
                         outstring.append(last_output_message)
-                    else:
                         if cmd_q:
                             cmd_queue.append(arg)
                 if cmd_queue:
