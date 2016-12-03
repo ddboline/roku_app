@@ -32,6 +32,8 @@ def send_single_keypress(keypress):
     #roku_ip = 'NP-1XC384040132.fios-router.home'
     if keypress == 'Wait':
         time.sleep(5)
+    elif keypress == 'output':
+        return keypress
     elif keypress == 'Gtalk':
         run_command('%s/bin/send_to_gtalk checkRoku' % HOMEDIR)
     else:
@@ -78,7 +80,7 @@ def send_to_roku(arglist=None):
         return retval
 
     for arg in arglist:
-        if arg in ['thumb', 'test', 'q', 'output']:
+        if arg in ['thumb', 'test', 'q']:
             retval = '%s%s' % (retval, send_command(arg,
                                socketfile='/tmp/.record_roku_socket'))
         elif arg == 'run':
