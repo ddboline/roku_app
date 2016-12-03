@@ -257,7 +257,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                                 fname, prefix='test')
                     elif _cmd == 'extend':
                         msg_q.put('extend')
-                    else:
+                    elif _cmd != 'output':
                         outstring = send_to_roku([_cmd])
                     if outstring:
                         msg_q.put(outstring)
