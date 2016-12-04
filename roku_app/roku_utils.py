@@ -45,7 +45,7 @@ def send_single_keypress(keypress):
         except:
             raise
         if result.status_code != 200:
-            return 'Error %d on keypress %s' % (result.status_code, keypress)
+            return 'Error %d on keypress "%s"' % (result.status_code, keypress)
     return keypress
 
 
