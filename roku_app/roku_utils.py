@@ -190,11 +190,11 @@ def run_fix_pvr(unload_module=True):
         while not is_module_loaded('pvrusb2'):
             time.sleep(10)
     run_command('sudo chown -R %s:%s ' % (USER, USER) +
-                '/sys/class/pvrusb2/sn-5370885/')
+                '/sys/class/pvrusb2/sn-4031902725/')
     run_command('sudo chown %s:%s ' % (USER, USER) +
                 '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor')
 
-    sdir = '/sys/class/pvrusb2/sn-5370885'
+    sdir = '/sys/class/pvrusb2/sn-4031902725'
 
     for fn_, l__ in [['ctl_video_standard_mask_active/cur_val', 'NTSC-M'],
                      ['ctl_input/cur_val', 'composite'],
