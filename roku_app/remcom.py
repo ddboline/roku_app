@@ -215,6 +215,10 @@ def remcom_test_main():
     directory = getattr(args, 'directory', None)
     unwatched = getattr(args, 'unwatched', False)
     files = getattr(args, 'files', [])
+    return _process(directory, unwatched, files)
+
+
+def _process(directory, unwatched, files):
     if directory:
         if not os.path.exists(
                 '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
@@ -305,9 +309,13 @@ def remcom_test_main():
     else:
         for fname in files:
             tmp = fname.split('.')[0].split('_')
-            show = '_'.join(tmp[:-2])
-            season = int(tmp[-2].strip('s'))
-            episode = int(tmp[-1].strip('ep'))
+            try:
+                show = '_'.join(tmp[:-2])
+                season = int(tmp[-2].strip('s'))
+                episode = int(tmp[-1].strip('ep'))
+            except ValueError:
+                return _process(directory=directory, unwatched=True,
+                                files=files)
 
             prefix = '%s_s%02d_ep%02d' % (show, season, episode)
             output_dir = '%s/Documents/television/%s/season%d' % (
