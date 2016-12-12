@@ -27,7 +27,7 @@ USER = os.getenv('USER')
 
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
-    roku_ip = '192.168.1.209'
+    roku_ip = os.getenv('ROKUIP', '192.168.1.209')
 #    roku_ip = 'roku-box.fios-router.home'
     #roku_ip = 'NP-1XC384040132.fios-router.home'
     if keypress == 'Wait':
