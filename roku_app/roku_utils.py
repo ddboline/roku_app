@@ -25,9 +25,17 @@ HOMEDIR = os.getenv('HOME')
 USER = os.getenv('USER')
 
 
+def load_ip_from_file(ipfilename='%s/.roku.conf' % HOMEDIR):
+    if os.path.exists(ipfilename):
+        with open(ipfilename, 'r') as inpf:
+            return inpf.read()
+    else:
+        return os.getenv('ROKUIP', '192.168.1.210')
+
+
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
-    roku_ip = os.getenv('ROKUIP', '192.168.1.209')
+    roku_ip = load_ip_from_file()
 #    roku_ip = 'roku-box.fios-router.home'
     #roku_ip = 'NP-1XC384040132.fios-router.home'
     if keypress == 'Wait':
