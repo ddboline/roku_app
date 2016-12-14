@@ -28,7 +28,7 @@ USER = os.getenv('USER')
 def load_ip_from_file(ipfilename='%s/.roku.conf' % HOMEDIR):
     if os.path.exists(ipfilename):
         with open(ipfilename, 'r') as inpf:
-            return inpf.read()
+            return inpf.read().strip()
     else:
         return os.getenv('ROKUIP', '192.168.1.210')
 
