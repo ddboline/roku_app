@@ -30,7 +30,7 @@ def load_ip_from_file(ipfilename='%s/.roku.conf' % HOMEDIR):
         with open(ipfilename, 'r') as inpf:
             return inpf.read().strip()
     else:
-        return os.getenv('ROKUIP', '192.168.1.210')
+        return os.getenv('ROKUIP', 'roku-box.fios-router.home')
 
 
 def send_single_keypress(keypress):
