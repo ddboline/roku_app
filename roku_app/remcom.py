@@ -314,8 +314,9 @@ def _process(directory, unwatched, files):
                 season = int(tmp[-2].strip('s'))
                 episode = int(tmp[-1].strip('ep'))
             except ValueError:
-                return _process(directory=directory, unwatched=True,
-                                files=files)
+                _process(directory=directory, unwatched=True,
+                         files=[fname])
+                continue
 
             prefix = '%s_s%02d_ep%02d' % (show, season, episode)
             output_dir = '%s/Documents/television/%s/season%d' % (
