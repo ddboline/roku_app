@@ -8,6 +8,6 @@ sudo apt-get update
 sudo apt-get install -y --force-yes python3-numpy=1.\* python3-scipy python3-dateutil \
                                     python3-requests python3-matplotlib python3-pytest\
                                     mplayer mpv mencoder python3-coverage \
-                                    python3-setuptools python3-dev
+                                    python3-setuptools python3-dev python3-pytest-cov
 
 mkdir -p ${HOME}/netflix/jobs ${HOME}/netflix/avi ${HOME}/netflix/log ${HOME}/netflix/mpg ${HOME}/netflix/tmp
