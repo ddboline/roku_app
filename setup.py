@@ -9,13 +9,14 @@ from __future__ import (absolute_import, division, print_function)
 import sys
 from setuptools import setup
 
-console_scripts = (('run-recording', 'roku_app.record_roku:main'),
-                   ('run-encoding', 'roku_app.run_encoding:run_encoding'),
-                   ('run-remcom-test', 'roku_app.remcom:remcom_test_main'),
-                   ('run-remove-commercials', 'roku_app.remove_commercials:main'),
-                   ('play-roku', 'roku_app.roku_utils:play_roku'),
-                   ('send-to-roku', 'roku_app.roku_utils:send_to_roku_main'),
-                   ('transcode-avi', 'roku_app.remcom:transcode_main'))
+console_scripts = (
+    ('run-recording', 'roku_app.record_roku:main'),
+    ('run-encoding', 'roku_app.run_encoding:run_encoding'),
+    ('run-remcom-test', 'roku_app.remcom:remcom_test_main'),
+    ('run-remove-commercials', 'roku_app.remove_commercials:main'),
+    ('play-roku', 'roku_app.roku_utils:play_roku'),
+    ('send-to-roku', 'roku_app.roku_utils:send_to_roku_main'),
+    ('transcode-avi', 'roku_app.remcom:transcode_main'))
 
 if sys.version_info.major == 2:
     console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]
