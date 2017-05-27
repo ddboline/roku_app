@@ -57,7 +57,8 @@ def make_transcode_script(input_file):
     for suffix in '.avi', '.mp4', '.mkv':
         prefix = prefix.replace(suffix, '')
     output_file = '%s/dvdrip/avi/%s.mp4' % (HOMEDIR, prefix)
-    with open('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix), 'w') as outfile:
+    tmpfile = '%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix)
+    with open(tmpfile, 'w') as outfile:
         outfile.write('#!/bin/bash\n')
         outfile.write('nice -n 19 HandBrakeCLI ')
         outfile.write('-i %s -o %s ' % (input_file, output_file))
@@ -65,10 +66,10 @@ def make_transcode_script(input_file):
         outfile.write('> ~/dvdrip/log/%s_mp4.out 2>&1\n' % prefix)
         outfile.write('mv %s ~/Documents/movies/\n' % output_file)
         outfile.write('mv ~/dvdrip/log/%s_mp4.out ~/tmp_avi/\n' % prefix)
+    mp4file = '%s/dvdrip/jobs/%s_mp4_tc.sh' % (HOMEDIR, prefix)
 
-    os.rename('%s/dvdrip/tmp/%s.sh' % (HOMEDIR, prefix),
-              '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix))
-    return '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
+    os.rename(tmpfile, mp4file)
+    return mp4file
 
 
 def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
