@@ -66,7 +66,10 @@ def make_transcode_script(input_file):
         outfile.write('> ~/dvdrip/log/%s_mp4.out 2>&1\n' % prefix)
         outfile.write('mv %s ~/Documents/movies/\n' % output_file)
         outfile.write('mv ~/dvdrip/log/%s_mp4.out ~/tmp_avi/\n' % prefix)
-    mp4file = '%s/dvdrip/jobs/%s_mp4_tc.sh' % (HOMEDIR, prefix)
+    mp4file = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
+
+    if os.path.exists(mp4file):
+        raise Exception('Transcode file already exists! %s' % mp4file)
 
     os.rename(tmpfile, mp4file)
     return mp4file
