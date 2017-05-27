@@ -26,7 +26,7 @@ else:
 
 setup(
     name='roku_app',
-    version='0.0.5.2',
+    version='0.0.5.3',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='roku_app',
