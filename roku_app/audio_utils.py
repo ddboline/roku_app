@@ -17,8 +17,7 @@ from .util import run_command
 from .roku_utils import HOMEDIR, get_length_of_mpg
 
 
-def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
-                              do_fft=True, fft_sum=None):
+def make_audio_analysis_plots(infile, prefix='temp', make_plots=True, do_fft=True, fft_sum=None):
     ''' create frequency plot '''
     import numpy as np
     from scipy import fftpack
@@ -35,7 +34,7 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     except ValueError:
         print('error reading wav file')
         return -1
-    dt_ = 1./rate
+    dt_ = 1. / rate
     time_ = dt_ * data.shape[0]
     tvec = np.arange(0, time_, dt_)
     sig0 = data[:, 0]
@@ -61,17 +60,16 @@ def make_audio_analysis_plots(infile, prefix='temp', make_plots=True,
     sig_fft1 = fftpack.fft(sig1)
     if make_plots:
         pl.clf()
-        pl.plot(np.log(np.abs(samp_freq0)+1e-9), np.abs(sig_fft0))
-        pl.plot(np.log(np.abs(samp_freq1)+1e-9), np.abs(sig_fft1))
+        pl.plot(np.log(np.abs(samp_freq0) + 1e-9), np.abs(sig_fft0))
+        pl.plot(np.log(np.abs(samp_freq1) + 1e-9), np.abs(sig_fft1))
         pl.xlim(np.log(10), np.log(40e3))
         xtickarray = np.log(np.array([20, 1e2, 3e2, 1e3, 3e3, 10e3, 30e3]))
-        pl.xticks(xtickarray, ['20Hz', '100Hz', '300Hz', '1kHz', '3kHz',
-                               '10kHz', '30kHz'])
+        pl.xticks(xtickarray, ['20Hz', '100Hz', '300Hz', '1kHz', '3kHz', '10kHz', '30kHz'])
         pl.savefig('%s/%s_fft.png' % (HOMEDIR, prefix))
         pl.clf()
 
-        run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/'
-                    % (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
+        run_command('mv %s/%s_time.png %s/%s_fft.png %s/public_html/videos/' %
+                    (HOMEDIR, prefix, HOMEDIR, prefix, HOMEDIR))
 
     fft_sum_ = float(np.sum(np.abs(sig_fft0)))
     if hasattr(fft_sum, 'value'):
@@ -89,20 +87,17 @@ def make_time_series_plot(input_file='', prefix='temp'):
     length_of_file = get_length_of_mpg(input_file)
     audio_vals = []
     for time_ in range(0, length_of_file, 60):
-        run_command('mpv --start=%d ' % time_ +
-                    '--length=10 --ao=pcm:fast:file=%s/' % HOMEDIR +
-                    '%s.wav --no-video ' % prefix +
-                    '%s 2> /dev/null > /dev/null' % input_file)
-        aud_int = make_audio_analysis_plots('%s/%s.wav' % (HOMEDIR, prefix),
-                                            make_plots=False, do_fft=False)
+        run_command('mpv --start=%d ' % time_ + '--length=10 --ao=pcm:fast:file=%s/' % HOMEDIR +
+                    '%s.wav --no-video ' % prefix + '%s 2> /dev/null > /dev/null' % input_file)
+        aud_int = make_audio_analysis_plots(
+            '%s/%s.wav' % (HOMEDIR, prefix), make_plots=False, do_fft=False)
         audio_vals.append(aud_int)
     #print(audio_vals)
     x__ = np.arange(0, length_of_file, 60)
     y__ = np.array(audio_vals)
     pl.clf()
-    pl.plot(x__/60., y__)
+    pl.plot(x__ / 60., y__)
     pl.savefig('%s/%s_time.png' % (HOMEDIR, prefix))
     pl.clf()
-    run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix,
-                                                              HOMEDIR))
+    run_command('mv %s/%s_time.png %s/public_html/videos/' % (HOMEDIR, prefix, HOMEDIR))
     return 'Done'

@@ -11,8 +11,7 @@ HOMEDIR = os.getenv('HOME')
 TMPDIR = '%s/television/tmp' % HOMEDIR
 
 
-def remove_commercials(infile='', outfile='', timing_string='0,3600',
-                       do_async=False):
+def remove_commercials(infile='', outfile='', timing_string='0,3600', do_async=False):
     '''
         cut and splice recorded file to remove undesired sections (commercials)
     '''
@@ -72,9 +71,7 @@ def remove_commercials(infile='', outfile='', timing_string='0,3600',
 
     tmp_script.write('chmod u+w %s\n' % infile)
     tmp_script.write('du -sh %s %s\n' % (infile, outfile))
-    tmp_script.write('rm %s/%s_*.avi %s/%s_*.out 2> /dev/null\n' % (TMPDIR,
-                                                                    temp_pre,
-                                                                    TMPDIR,
+    tmp_script.write('rm %s/%s_*.avi %s/%s_*.out 2> /dev/null\n' % (TMPDIR, temp_pre, TMPDIR,
                                                                     temp_pre))
     tmp_script.close()
     if do_async:

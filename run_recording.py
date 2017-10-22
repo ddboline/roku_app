@@ -19,7 +19,7 @@ if __name__ == '__main__':
         RECORDING_NAME = argv[1]
     if len(argv) > 2:
         try:
-            RECORDING_TIME = int(argv[2])*60
+            RECORDING_TIME = int(argv[2]) * 60
         except ValueError:
             pass
     if len(argv) > 3:

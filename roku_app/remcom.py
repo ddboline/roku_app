@@ -1,7 +1,6 @@
 #!/usr/bin/python
 ''' remcom test module '''
-from __future__ import (absolute_import, division, print_function,
-                        unicode_literals)
+from __future__ import (absolute_import, division, print_function, unicode_literals)
 import argparse
 import os
 import re
@@ -12,10 +11,9 @@ import pytest
 
 from .remove_commercials import remove_commercials
 from .roku_utils import (make_thumbnails, make_audio_analysis_plots_wrapper,
-                         make_time_series_plot_wrapper,
-                         publish_transcode_job_to_queue, get_random_hex_string)
-from .util import (run_command, send_command, OpenUnixSocketServer,
-                   OpenSocketConnection, HOMEDIR)
+                         make_time_series_plot_wrapper, publish_transcode_job_to_queue,
+                         get_random_hex_string)
+from .util import (run_command, send_command, OpenUnixSocketServer, OpenSocketConnection, HOMEDIR)
 
 REMCOM_SOCKET_FILE = '/tmp/.remcom_test_socket'
 INPUT_DIR = '%s/Documents/movies' % HOMEDIR
@@ -26,22 +24,19 @@ def make_video_script(input_file='', begin_time=0):
     ''' write script to create small test video file '''
     if not os.path.exists(input_file):
         return -1
-    input_string = '%d,%d' % (begin_time, begin_time+10)
+    input_string = '%d,%d' % (begin_time, begin_time + 10)
     tmpfile = '%s/dvdrip/tmp/test_%06x' % (HOMEDIR, get_random_hex_string(3))
     avifile = '%s.avi' % tmpfile
     mp4file = '%s.mp4' % tmpfile
     wavfile = '%s.wav' % tmpfile
-    remove_commercials(infile=input_file, outfile=avifile,
-                       timing_string=input_string)
+    remove_commercials(infile=input_file, outfile=avifile, timing_string=input_string)
     run_command('time HandBrakeCLI -i %s -f mp4 -e x264 ' % avifile +
                 '-b 600 -o %s > /dev/null 2>&1\n' % mp4file)
-    run_command('mpv --ao=pcm:file=%s --no-video ' % wavfile +
-                '%s > /dev/null 2>&1\n' % avifile)
+    run_command('mpv --ao=pcm:file=%s --no-video ' % wavfile + '%s > /dev/null 2>&1\n' % avifile)
     run_command('mv %s %s/public_html/videos/temp.mp4\n' % (mp4file, HOMEDIR))
     run_command('cp %s/public_html/videos/temp.mp4 ' % HOMEDIR +
                 '%s/public_html/videos/AAAAAAA/' % HOMEDIR)
-    run_command('du -sh %s %s/public_html/videos/temp.mp4\n' % (input_file,
-                                                                HOMEDIR))
+    run_command('du -sh %s %s/public_html/videos/temp.mp4\n' % (input_file, HOMEDIR))
     os.remove(avifile)
     retval = make_audio_analysis_plots_wrapper(wavfile, prefix='temp')
     os.remove(wavfile)
@@ -75,22 +70,24 @@ def make_transcode_script(input_file):
     return mp4file
 
 
-def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0,
-                               end_time=0):
+def remove_commercials_wrapper(input_file='', output_dir='', begin_time=0, end_time=0):
     '''
         cut and splice recorded file to remove undesired sections
         (commercials), use temp not test here...
     '''
     input_string = '%d,%d' % (begin_time, end_time)
     output_file = '%s/%s' % (output_dir, os.path.basename(input_file))
-    remove_commercials(input_file, output_file,
-                       timing_string=input_string, do_async=True)
+    remove_commercials(input_file, output_file, timing_string=input_string, do_async=True)
     make_transcode_script(output_file)
     return output_file
 
 
-def remcom(movie_filename, output_dir, begin_time, end_time,
-           msg_q=None, socketfile=REMCOM_SOCKET_FILE):
+def remcom(movie_filename,
+           output_dir,
+           begin_time,
+           end_time,
+           msg_q=None,
+           socketfile=REMCOM_SOCKET_FILE):
     '''
         main function, takes filename, timing file as options
         communication via socket:
@@ -129,39 +126,35 @@ def remcom(movie_filename, output_dir, begin_time, end_time,
                         except ValueError:
                             end_time -= 60
                     elif option == 's':
-                        remove_commercials_wrapper(movie_filename, output_dir,
-                                                   begin_time, end_time)
+                        remove_commercials_wrapper(movie_filename, output_dir, begin_time, end_time)
                         conn.send(b'done')
                         msg_q.put('q')
                         return 0
                     elif option == 'v':
-                        outstring.append('%s' % make_video_script(
-                            movie_filename, begin_time=end_time))
-                    elif option == 't':
                         outstring.append(
-                            make_time_series_plot_wrapper(movie_filename))
+                            '%s' % make_video_script(movie_filename, begin_time=end_time))
+                    elif option == 't':
+                        outstring.append(make_time_series_plot_wrapper(movie_filename))
                     else:
                         try:
                             end_time = int(option) * 60
                             print('end_time: %s' % option)
                         except ValueError:
                             continue
-                outstring.append(
-                    '%s %s %s %s' % (os.path.basename(movie_filename),
-                                     '/'.join(output_dir.split('/')[-2:]),
-                                     begin_time, end_time))
-                tmp_begin = make_thumbnails(input_file=movie_filename,
-                                            begin_time=end_time,
-                                            output_dir=HOMEDIR +
-                                            '/public_html/videos/'
-                                            'thumbnails_tv')
+                outstring.append('%s %s %s %s' %
+                                 (os.path.basename(movie_filename),
+                                  '/'.join(output_dir.split('/')[-2:]), begin_time, end_time))
+                tmp_begin = make_thumbnails(
+                    input_file=movie_filename,
+                    begin_time=end_time,
+                    output_dir=HOMEDIR + '/public_html/videos/'
+                    'thumbnails_tv')
                 outstring.append('%d, s/f/b/q/t:' % (tmp_begin / 60))
                 outstring = '\n'.join(outstring)
                 conn.send(outstring.encode())
 
         if original_end_time > end_time:
-            print('original %s new %s args %s' % (original_end_time, end_time,
-                                                  args))
+            print('original %s new %s args %s' % (original_end_time, end_time, args))
     return 0
 
 
@@ -181,8 +174,7 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
     ''' main recom_test function '''
     msg_q = mp.Queue()
 
-    net = mp.Process(target=remcom, args=(movie_filename, output_dir,
-                                          begin_time, end_time, msg_q))
+    net = mp.Process(target=remcom, args=(movie_filename, output_dir, begin_time, end_time, msg_q))
     net.start()
     time.sleep(5)
 
@@ -190,15 +182,15 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
         if option:
             option = send_command(option, socketfile=REMCOM_SOCKET_FILE)
             if option:
-                print(option,)
+                print(option, )
                 os.sys.stdout.flush()
             option = False
         while not msg_q.empty():
             option = msg_q.get()
             print('got message %s' % option)
         if option == 'q':
-            run_command('kill -9 %d 2>&1 > /dev/null' % (net.pid,))
-            print('killing %d' % (net.pid,))
+            run_command('kill -9 %d 2>&1 > /dev/null' % (net.pid, ))
+            print('killing %d' % (net.pid, ))
             break
         if not net.is_alive():
             break
@@ -210,10 +202,10 @@ def remcom_main(movie_filename, output_dir, begin_time, end_time):
 def remcom_test_main():
     parser = argparse.ArgumentParser(description='remcom_test script')
     parser.add_argument('files', nargs='*', help='remcom_test files')
-    parser.add_argument('-d', '--directory', type=str,
-                        help='specify directory (must be in Documents/movies)')
-    parser.add_argument('-u', '--unwatched', action='store_true',
-                        help='copy to television/unwatched')
+    parser.add_argument(
+        '-d', '--directory', type=str, help='specify directory (must be in Documents/movies)')
+    parser.add_argument(
+        '-u', '--unwatched', action='store_true', help='copy to television/unwatched')
     args = parser.parse_args()
 
     directory = getattr(args, 'directory', None)
@@ -224,8 +216,7 @@ def remcom_test_main():
 
 def _process(directory, unwatched, files):
     if directory:
-        if not os.path.exists(
-                '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
+        if not os.path.exists('%s/Documents/movies/%s' % (OUTPUT_DIR, directory)):
             raise Exception('bad directory')
         for fname in files:
             input_filename = '%s/%s' % (INPUT_DIR, fname)
@@ -234,8 +225,7 @@ def _process(directory, unwatched, files):
             for suffix in '.avi', '.mp4', '.mkv':
                 prefix = prefix.replace(suffix, '')
             mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
-            output_directory = '%s/Documents/movies/%s' % (OUTPUT_DIR,
-                                                           directory)
+            output_directory = '%s/Documents/movies/%s' % (OUTPUT_DIR, directory)
 
             if not os.path.exists(input_filename):
                 continue
@@ -245,11 +235,9 @@ def _process(directory, unwatched, files):
                 with open(mp4_script, 'w') as inpf:
                     inpf.write('#!/bin/bash\n')
                     inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
-                               '%s/\n' % (HOMEDIR, fname, OUTPUT_DIR,
-                                          directory))
-                    inpf.write(
-                        '%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
-                        % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+                               '%s/\n' % (HOMEDIR, fname, OUTPUT_DIR, directory))
+                    inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n' %
+                               (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
                 publish_transcode_job_to_queue(mp4_script)
                 continue
 
@@ -259,14 +247,12 @@ def _process(directory, unwatched, files):
                 exit(0)
             with open(mp4_script, 'a') as inpf:
                 inpf.write('cp %s/Documents/movies/%s %s/Documents/movies/'
-                           '%s/\n' % (HOMEDIR, mp4_filename, OUTPUT_DIR,
-                                      directory))
+                           '%s/\n' % (HOMEDIR, mp4_filename, OUTPUT_DIR, directory))
                 inpf.write('mv %s/Documents/movies/%s/%s %s/'
-                           'Documents/movies/\n' % (OUTPUT_DIR, directory,
-                                                    fname, HOMEDIR))
+                           'Documents/movies/\n' % (OUTPUT_DIR, directory, fname, HOMEDIR))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
-                inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n'
-                           % (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
+                inpf.write('%s/bin/make_queue add %s/Documents/movies/%s/%s\n' %
+                           (HOMEDIR, OUTPUT_DIR, directory, mp4_filename))
             publish_transcode_job_to_queue(mp4_script)
     elif unwatched:
         for fname in files:
@@ -284,10 +270,9 @@ def _process(directory, unwatched, files):
                 with open(mp4_script, 'w') as inpf:
                     inpf.write('#!/bin/bash\n')
                     inpf.write('cp %s/Documents/movies/%s %s/'
-                               'television/unwatched/\n' % (HOMEDIR, fname,
-                                                            OUTPUT_DIR))
-                    inpf.write('%s/bin/make_queue add %s/%s\n'
-                               % (HOMEDIR, output_dir, mp4_filename))
+                               'television/unwatched/\n' % (HOMEDIR, fname, OUTPUT_DIR))
+                    inpf.write('%s/bin/make_queue add %s/%s\n' % (HOMEDIR, output_dir,
+                                                                  mp4_filename))
                 publish_transcode_job_to_queue(mp4_script)
                 continue
 
@@ -297,18 +282,13 @@ def _process(directory, unwatched, files):
                 exit(0)
             with open(mp4_script, 'a') as inpf:
                 inpf.write('cp %s/Documents/movies/%s %s/'
-                           'television/unwatched/\n' % (HOMEDIR, mp4_filename,
-                                                        OUTPUT_DIR))
-                inpf.write(
-                    'mv %s/Documents/movies/%s %s/Documents/movies/%s\n'
-                    % (HOMEDIR, fname, HOMEDIR, fname.replace('.avi',
-                                                              '.old.avi')))
+                           'television/unwatched/\n' % (HOMEDIR, mp4_filename, OUTPUT_DIR))
+                inpf.write('mv %s/Documents/movies/%s %s/Documents/movies/%s\n' %
+                           (HOMEDIR, fname, HOMEDIR, fname.replace('.avi', '.old.avi')))
                 inpf.write('mv %s/television/unwatched/%s %s/'
-                           'Documents/movies/\n' % (OUTPUT_DIR, fname,
-                                                    HOMEDIR))
+                           'Documents/movies/\n' % (OUTPUT_DIR, fname, HOMEDIR))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
-                inpf.write('%s/bin/make_queue add %s/%s\n'
-                           % (HOMEDIR, output_dir, mp4_filename))
+                inpf.write('%s/bin/make_queue add %s/%s\n' % (HOMEDIR, output_dir, mp4_filename))
             publish_transcode_job_to_queue(mp4_script)
     else:
         for fname in files:
@@ -318,31 +298,23 @@ def _process(directory, unwatched, files):
                 season = int(tmp[-2].strip('s'))
                 episode = int(tmp[-1].strip('ep'))
             except ValueError:
-                _process(directory=directory, unwatched=True,
-                         files=[fname])
+                _process(directory=directory, unwatched=True, files=[fname])
                 continue
 
             prefix = '%s_s%02d_ep%02d' % (show, season, episode)
-            output_dir = '%s/Documents/television/%s/season%d' % (
-                OUTPUT_DIR, show, season)
-            inavifile = '%s/Documents/movies/%s.avi' % (
-                HOMEDIR, prefix)
-            mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (
-                HOMEDIR, prefix)
-            avifile = '%s/%s.avi' % (
-                output_dir, prefix)
-            mp4file = '%s/Documents/movies/%s.mp4' % (
-                HOMEDIR, prefix)
-            mp4file_final = '%s/%s.mp4' % (
-                output_dir, prefix)
+            output_dir = '%s/Documents/television/%s/season%d' % (OUTPUT_DIR, show, season)
+            inavifile = '%s/Documents/movies/%s.avi' % (HOMEDIR, prefix)
+            mp4_script = '%s/dvdrip/jobs/%s_mp4.sh' % (HOMEDIR, prefix)
+            avifile = '%s/%s.avi' % (output_dir, prefix)
+            mp4file = '%s/Documents/movies/%s.mp4' % (HOMEDIR, prefix)
+            mp4file_final = '%s/%s.mp4' % (output_dir, prefix)
 
             if fname.endswith('.mp4'):
                 with open(mp4_script, 'w') as inpf:
                     inpf.write('#!/bin/bash\n')
                     inpf.write('mkdir -p %s\n' % output_dir)
                     inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
-                    inpf.write('%s/bin/make_queue add %s\n'
-                               % (HOMEDIR, mp4file_final))
+                    inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR, mp4file_final))
                 publish_transcode_job_to_queue(mp4_script)
                 continue
 
@@ -353,11 +325,9 @@ def _process(directory, unwatched, files):
             with open(mp4_script, 'a') as inpf:
                 inpf.write('mkdir -p %s\n' % output_dir)
                 inpf.write('cp %s %s\n' % (mp4file, mp4file_final))
-                inpf.write('mv %s %s/Documents/movies/%s.old.avi\n' % (
-                    avifile, HOMEDIR, prefix))
+                inpf.write('mv %s %s/Documents/movies/%s.old.avi\n' % (avifile, HOMEDIR, prefix))
                 inpf.write('rm %s/tmp_avi/%s_0.mpg\n' % (HOMEDIR, prefix))
-                inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR,
-                                                           mp4file_final))
+                inpf.write('%s/bin/make_queue add %s\n' % (HOMEDIR, mp4file_final))
             publish_transcode_job_to_queue(mp4_script)
 
 
@@ -369,8 +339,7 @@ def transcode_main():
             continue
         elif os.path.exists(os.path.abspath(arg)):
             fnames.append(os.path.abspath(arg))
-        elif os.path.exists('%s/Documents/movies/%s' % (os.getenv('HOME'),
-                                                        arg)):
+        elif os.path.exists('%s/Documents/movies/%s' % (os.getenv('HOME'), arg)):
             fnames.append('%s/Documents/movies/%s' % (os.getenv('HOME'), arg))
         elif arg == 'add':
             do_add = True
@@ -391,14 +360,11 @@ def transcode_main():
         tfile = make_transcode_script(fname)
         with open(tfile, 'a') as outf:
             outf.write('\n')
-            outf.write('cp ~/Documents/movies/%s.mp4 %s.mp4.new\n' % (show,
-                                                                      oname))
+            outf.write('cp ~/Documents/movies/%s.mp4 %s.mp4.new\n' % (show, oname))
             outf.write('mv %s ~/Documents/movies/%s.old\n' % (fname, bname))
-            outf.write('mv ~/Documents/movies/%s.old ~/Documents/movies/%s\n'
-                       % (bname, bname))
+            outf.write('mv ~/Documents/movies/%s.old ~/Documents/movies/%s\n' % (bname, bname))
             outf.write('mv %s.mp4.new %s.mp4\n' % (oname, oname))
             if do_add:
                 outf.write('/home/ddboline/bin/make_queue rm %s\n' % fname)
-                outf.write('/home/ddboline/bin/make_queue add %s.mp4\n'
-                           % oname)
+                outf.write('/home/ddboline/bin/make_queue add %s.mp4\n' % oname)
         publish_transcode_job_to_queue(tfile)

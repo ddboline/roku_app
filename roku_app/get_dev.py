@@ -40,8 +40,8 @@ def get_dev(user_mod=''):
                 print('YOU NEED TO INSTALL v4l-conf')
                 exit(0)
             driver = ''
-            with run_command('v4l-info %s 2> /dev/null | grep driver'
-                             % devname, do_popen=True) as v4linfo:
+            with run_command(
+                    'v4l-info %s 2> /dev/null | grep driver' % devname, do_popen=True) as v4linfo:
                 for line in v4linfo:
                     if hasattr(line, 'decode'):
                         line = line.decode()

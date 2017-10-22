@@ -20,6 +20,7 @@ HOMEDIR = os.getenv('HOME')
 
 class PopenWrapperClass(object):
     """ context wrapper around subprocess.Popen """
+
     def __init__(self, command):
         """ init fn """
         self.command = command
@@ -45,8 +46,7 @@ class PopenWrapperClass(object):
                 return True
 
 
-def run_command(command, do_popen=False, turn_on_commands=True,
-                single_line=False):
+def run_command(command, do_popen=False, turn_on_commands=True, single_line=False):
     """ wrapper around os.system """
     if not turn_on_commands:
         print(command)
@@ -141,6 +141,7 @@ def datetimefromstring(tstr, ignore_tz=False):
 
 class OpenUnixSocketServer(object):
     ''' wrapper around server socket for context manager '''
+
     def __init__(self, socketfile):
         self.sock = None
         self.socketfile = socketfile
@@ -172,6 +173,7 @@ class OpenUnixSocketServer(object):
 
 class OpenSocketConnection(object):
     ''' wrapper around socket.accept for context manager '''
+
     def __init__(self, sock):
         self.sock = sock
         self.conn = None
@@ -204,9 +206,7 @@ def test_convert_date():
     inp_date = '111780'
     out_date = convert_date(inp_date)
     if out_date.year > datetime.date.today().year:
-        out_date = datetime.date(year=out_date.year-100,
-                                 month=out_date.month,
-                                 day=out_date.day)
+        out_date = datetime.date(year=out_date.year - 100, month=out_date.month, day=out_date.day)
     assert out_date == datetime.date(1980, 11, 17)
 
 

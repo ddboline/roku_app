@@ -36,7 +36,7 @@ def load_ip_from_file(ipfilename='%s/.roku.conf' % HOMEDIR):
 def send_single_keypress(keypress):
     ''' wrapper around requests.post '''
     roku_ip = load_ip_from_file()
-#    roku_ip = 'roku-box.fios-router.home'
+    #    roku_ip = 'roku-box.fios-router.home'
     #roku_ip = 'NP-1XC384040132.fios-router.home'
     if keypress == 'Wait':
         time.sleep(5)
@@ -46,8 +46,7 @@ def send_single_keypress(keypress):
         run_command('%s/bin/send_to_gtalk checkRoku' % HOMEDIR)
     else:
         try:
-            result = requests.post('http://%s:8060/keypress/%s' % (roku_ip,
-                                                                   keypress))
+            result = requests.post('http://%s:8060/keypress/%s' % (roku_ip, keypress))
         except requests.ConnectionError as exc:
             return 'connection error\n%s' % exc
         except:
@@ -65,32 +64,33 @@ def send_to_roku(arglist=None):
 
     retval = ''
 
-    command_shortcuts = {'h': 'Home',
-                         'l': 'Left',
-                         'r': 'Right',
-                         's': 'Select',
-                         'f': 'Fwd',
-                         'b': 'Back',
-                         'u': 'Up',
-                         'd': 'Down',
-                         'p': 'Play',
-                         'w': 'Wait',
-                         'g': 'Gtalk',
-                         'rv': 'Rev',
-                         'ir': 'InstantReplay',
-                         'if': 'Info',
-                         'bs': 'Backspace',
-                         'sc': 'Search',
-                         'en': 'Enter',
-                         'as': 'Lit_*'}
+    command_shortcuts = {
+        'h': 'Home',
+        'l': 'Left',
+        'r': 'Right',
+        's': 'Select',
+        'f': 'Fwd',
+        'b': 'Back',
+        'u': 'Up',
+        'd': 'Down',
+        'p': 'Play',
+        'w': 'Wait',
+        'g': 'Gtalk',
+        'rv': 'Rev',
+        'ir': 'InstantReplay',
+        'if': 'Info',
+        'bs': 'Backspace',
+        'sc': 'Search',
+        'en': 'Enter',
+        'as': 'Lit_*'
+    }
 
     if not arglist or len(arglist) == 0:
         return retval
 
     for arg in arglist:
         if arg in ['thumb', 'test', 'q']:
-            retval = '%s%s' % (retval, send_command(arg,
-                               socketfile='/tmp/.record_roku_socket'))
+            retval = '%s%s' % (retval, send_command(arg, socketfile='/tmp/.record_roku_socket'))
         elif arg == 'run':
             time.sleep(5)
             print('run\n')
@@ -104,13 +104,18 @@ def send_to_roku(arglist=None):
     return retval
 
 
-def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
-                                      do_fft=True):
+def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True, do_fft=True):
     ''' wrapper around make_audio_analysis_plots '''
     from .audio_utils import make_audio_analysis_plots
     fft_sum = Value('d')
-    tmp_ = Process(target=make_audio_analysis_plots,
-                   args=(infile, prefix, make_plots, do_fft, fft_sum,))
+    tmp_ = Process(
+        target=make_audio_analysis_plots, args=(
+            infile,
+            prefix,
+            make_plots,
+            do_fft,
+            fft_sum,
+        ))
     tmp_.start()
     tmp_.join()
     return fft_sum.value
@@ -119,7 +124,11 @@ def make_audio_analysis_plots_wrapper(infile, prefix='temp', make_plots=True,
 def make_time_series_plot_wrapper(input_file='', prefix='temp'):
     ''' wrapper around make_time_series_plot '''
     from .audio_utils import make_time_series_plot
-    tmp_ = Process(target=make_time_series_plot, args=(input_file, prefix,))
+    tmp_ = Process(
+        target=make_time_series_plot, args=(
+            input_file,
+            prefix,
+        ))
     tmp_.start()
     tmp_.join()
     return 'Done'
@@ -141,13 +150,15 @@ def get_length_of_mpg(fname='%s/netflix/mpg/test_roku_0.mpg' % HOMEDIR):
             try:
                 nhour = int(items[0])
                 nmin = int(items[1])
-                nsecs = int(float(items[2])) + nmin*60 + nhour*60*60
+                nsecs = int(float(items[2])) + nmin * 60 + nhour * 60 * 60
             except ValueError:
                 nsecs = -1
     return nsecs
 
 
-def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
+def make_thumbnails(prefix='test_roku',
+                    input_file='',
+                    begin_time=0,
                     output_dir='%s/public_html/videos/thumbnails' % HOMEDIR,
                     use_mplayer=True):
     ''' write out thumbnail images from running recording at specified time '''
@@ -161,8 +172,7 @@ def make_thumbnails(prefix='test_roku', input_file='', begin_time=0,
     run_command('mkdir -p %s' % output_dir)
     if use_mplayer:
         run_command('mplayer -ao null -vo jpeg:outdir=%s ' % tmpdir +
-                    '-frames 10 -ss %s ' % begin_time +
-                    '%s 2> /dev/null > /dev/null' % input_file)
+                    '-frames 10 -ss %s ' % begin_time + '%s 2> /dev/null > /dev/null' % input_file)
     else:
         run_command('mpv --ao=null --vo=image:format=jpg:outdir=%s ' % tmpdir +
                     '--frames=10 --start=%s ' % begin_time +
@@ -197,18 +207,16 @@ def run_fix_pvr(unload_module=True):
         time.sleep(20)
         while not is_module_loaded('pvrusb2'):
             time.sleep(10)
-    run_command('sudo chown -R %s:%s ' % (USER, USER) +
-                '/sys/class/pvrusb2/sn-4031902725/')
+    run_command('sudo chown -R %s:%s ' % (USER, USER) + '/sys/class/pvrusb2/sn-4031902725/')
     run_command('sudo chown %s:%s ' % (USER, USER) +
                 '/sys/devices/system/cpu/cpu0/cpufreq/scaling_governor')
 
     sdir = '/sys/class/pvrusb2/sn-4031902725'
 
-    for fn_, l__ in [['ctl_video_standard_mask_active/cur_val', 'NTSC-M'],
-                     ['ctl_input/cur_val', 'composite'],
+    for fn_, l__ in [['ctl_video_standard_mask_active/cur_val',
+                      'NTSC-M'], ['ctl_input/cur_val', 'composite'],
                      ['ctl_video_bitrate_mode/cur_val', 'Constant Bitrate'],
-                     ['ctl_video_bitrate/cur_val', '4000000'],
-                     ['ctl_volume/cur_val', '57000']]:
+                     ['ctl_video_bitrate/cur_val', '4000000'], ['ctl_volume/cur_val', '57000']]:
         write_single_line_to_file('%s/%s' % (sdir, fn_), l__)
 
     return
@@ -216,8 +224,7 @@ def run_fix_pvr(unload_module=True):
 
 def check_dmesg_for_ooops():
     ''' check for ooops in dmesg output '''
-    oops_messages = ['BUG: unable to handle kernel paging request at',
-                     'general protection fault']
+    oops_messages = ['BUG: unable to handle kernel paging request at', 'general protection fault']
     cmd_ = Popen('dmesg', shell=True, stdout=PIPE, close_fds=True).stdout
     for line in cmd_.readlines():
         if hasattr(line, 'decode'):
@@ -270,15 +277,15 @@ def open_transcode_channel(queue='transcode_work_queue'):
         connection.close()
 
 
-def publish_transcode_job_to_queue(script, queue='transcode_work_queue',
+def publish_transcode_job_to_queue(script,
+                                   queue='transcode_work_queue',
                                    routing_key='transcode_work_queue'):
     import json
     assert os.path.exists(script)
     body = {'script': script}
     body = json.dumps(body)
     with open_transcode_channel(queue=queue) as chan:
-        chan.basic_publish(exchange='', routing_key=routing_key,
-                           body=body)
+        chan.basic_publish(exchange='', routing_key=routing_key, body=body)
     return
 
 

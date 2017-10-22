@@ -13,11 +13,14 @@ import socket
 import logging
 
 from .get_dev import get_dev
-from .roku_utils import (make_audio_analysis_plots_wrapper,
-                         make_time_series_plot_wrapper,
-                         run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg,
-                         make_thumbnails, send_to_roku, get_random_hex_string)
-from .util import (run_command, OpenUnixSocketServer, OpenSocketConnection,)
+from .roku_utils import (make_audio_analysis_plots_wrapper, make_time_series_plot_wrapper,
+                         run_fix_pvr, check_dmesg_for_ooops, get_length_of_mpg, make_thumbnails,
+                         send_to_roku, get_random_hex_string)
+from .util import (
+    run_command,
+    OpenUnixSocketServer,
+    OpenSocketConnection,
+)
 
 ### Global variables, immutable
 HOMEDIR = os.getenv('HOME')
@@ -79,7 +82,7 @@ def initialize_roku(do_fix_pvr=False, msg_q=None):
         kill_running_recordings(GLOBAL_LIST_OF_SUBPROCESSES)
         exit(1)
 
-    fix_pvr_process = Process(target=run_fix_pvr, args=(do_fix_pvr,))
+    fix_pvr_process = Process(target=run_fix_pvr, args=(do_fix_pvr, ))
     fix_pvr_process.start()
     GLOBAL_LIST_OF_SUBPROCESSES.append(fix_pvr_process.pid)
 
@@ -117,22 +120,19 @@ def make_video(prefix='test_roku', begin_time=0):
     run_command(cmd_)
     ### matplotlib apparently occupies ~80MB in RAM
     ### running in a separate process ensures that the memory is released...
-    result = make_audio_analysis_plots_wrapper('%s.wav' % tmpfile,
-                                               prefix='test')
+    result = make_audio_analysis_plots_wrapper('%s.wav' % tmpfile, prefix='test')
     cmd_ = 'time HandBrakeCLI -i %s.avi -f mp4 -e x264 ' % tmpfile + \
            '-b 600 -o %s.mp4 >> ' % tmpfile + \
            '~/netflix/log/test.out 2>&1'
     run_command(cmd_)
     run_command('mv %s.mp4 ~/public_html/videos/test.mp4' % tmpfile)
-    run_command('cp ~/public_html/videos/test.mp4 '
-                '~/public_html/videos/AAAAAAA/')
+    run_command('cp ~/public_html/videos/test.mp4 ' '~/public_html/videos/AAAAAAA/')
     run_command('rm %s.*' % tmpfile)
 
     return result
 
 
-def make_transcode_script(prefix='test_roku',
-                          use_handbrake_for_transcode=False):
+def make_transcode_script(prefix='test_roku', use_handbrake_for_transcode=False):
     """
         write out transcode file at the end of the recording,
         will be used to convert mpg to avi / mp4 later on
@@ -152,16 +152,14 @@ def make_transcode_script(prefix='test_roku',
             outfile.write('-b 600 --encoder-preset ultrafast ')
             outfile.write('-o ~/netflix/avi/%s.mp4 ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
-            outfile.write('mv ~/netflix/avi/%s.mp4 ~/Documents/movies/\n '
-                          % prefix)
+            outfile.write('mv ~/netflix/avi/%s.mp4 ~/Documents/movies/\n ' % prefix)
         else:
             outfile.write('nice -n 19 mencoder ')
             outfile.write('~/netflix/mpg/%s_0.mpg ' % prefix)
             outfile.write('%s -vf crop=704:467:14:11,scale=470:-2 ' % mencopts)
             outfile.write('-o ~/netflix/avi/%s.avi ' % prefix)
             outfile.write('> ~/netflix/log/%s.out 2>&1\n' % prefix)
-            outfile.write('mv ~/netflix/avi/%s.avi ~/Documents/movies/\n'
-                          % prefix)
+            outfile.write('mv ~/netflix/avi/%s.avi ~/Documents/movies/\n' % prefix)
         outfile.write('mv ~/netflix/log/%s.out ~/tmp_avi/\n' % prefix)
         outfile.write('mv ~/netflix/mpg/%s_0.mpg ~/tmp_avi/\n' % prefix)
     return outfile
@@ -189,8 +187,7 @@ def server_thread(prefix='test_roku', msg_q=None, cmd_q=None,
                     if arg == 'q':
                         ### quit command: kill everything
                         if os.path.exists(KILLSCRIPT):
-                            run_command('sh %s ; rm %s' % (KILLSCRIPT,
-                                                           KILLSCRIPT))
+                            run_command('sh %s ; rm %s' % (KILLSCRIPT, KILLSCRIPT))
                         return 0
                     else:
                         ### output command: dump first msg_q to socket
@@ -240,10 +237,8 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                         if os.path.exists(fname):
                             _time = get_length_of_mpg(fname)
                             if _time > 0:
-                                _ts = make_thumbnails(prefix,
-                                                      begin_time=_time-1)
-                                outstring = 'got thumbnail at t=%d %d' % (
-                                            _ts, int(_ts)/60)
+                                _ts = make_thumbnails(prefix, begin_time=_time - 1)
+                                outstring = 'got thumbnail at t=%d %d' % (_ts, int(_ts) / 60)
                             else:
                                 outstring = 'ERROR: NO FILE FOUND %s' % prefix
                     elif _cmd == 'test':
@@ -253,8 +248,7 @@ def command_thread(prefix='test_roku', msg_q=None, cmd_q=None):
                                         (int(_ta), _ts, int(_ts)/60)
                     elif _cmd == 'time':
                         if os.path.exists(fname):
-                            outstring = make_time_series_plot_wrapper(
-                                fname, prefix='test')
+                            outstring = make_time_series_plot_wrapper(fname, prefix='test')
                     elif _cmd == 'extend':
                         msg_q.put('extend')
                     elif _cmd != 'output':
@@ -276,9 +270,9 @@ def make_thumb_script(prefix='test_roku'):
 
     st_ = -1
     if time_ > 0:
-        make_thumbnails(prefix, begin_time=time_-1)
+        make_thumbnails(prefix, begin_time=time_ - 1)
 
-        st_ = make_video(prefix, time_-10)
+        st_ = make_video(prefix, time_ - 10)
 
     return time_, st_
 
@@ -312,8 +306,11 @@ def monitoring_thread(prefix='test_roku', msg_q=None, mon_q=None):
     return 0
 
 
-def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
-                    mon_q=None, use_mplayer=True):
+def start_recording(device='/dev/video0',
+                    prefix='test_roku',
+                    msg_q=None,
+                    mon_q=None,
+                    use_mplayer=True):
     """ begin recording, star control, monioring, server threads """
     import shlex
     fname = '%s/netflix/mpg/%s_0.mpg' % (HOMEDIR, prefix)
@@ -328,8 +325,12 @@ def start_recording(device='/dev/video0', prefix='test_roku', msg_q=None,
     GLOBAL_LIST_OF_SUBPROCESSES.append(recording_process.pid)
     logging.info('recording pid: %s\n', recording_process.pid)
 
-    monitoring = Process(target=monitoring_thread, args=(prefix, msg_q,
-                                                         mon_q,))
+    monitoring = Process(
+        target=monitoring_thread, args=(
+            prefix,
+            msg_q,
+            mon_q,
+        ))
     monitoring.start()
 
     GLOBAL_LIST_OF_SUBPROCESSES.append(monitoring.pid)
@@ -372,8 +373,7 @@ def signal_finish(prefix='test_roku'):
             outfile.write('cd ~/setup_files/build/roku_app/ ; '
                           'python -c "import roku_app.roku_utils ; '
                           'roku_app.roku_utils.publish_transcode_job_to_queue('
-                          "'%s/netflix/jobs/%s.sh'" % (HOMEDIR, prefix)
-                          + ')"\n')
+                          "'%s/netflix/jobs/%s.sh'" % (HOMEDIR, prefix) + ')"\n')
 
     _, _ta = make_thumb_script(prefix)
     run_command('send_to_gtalk \"%s is done %d\"' % (prefix, int(_ta)))
@@ -388,8 +388,7 @@ def stop_recording(prefix='test_roku'):
     return
 
 
-def record_roku(recording_name='test_roku', recording_time=3600,
-                do_fix_pvr=False):
+def record_roku(recording_name='test_roku', recording_time=3600, do_fix_pvr=False):
     """
         main function, record video from roku device via wintv encoder
         options:
@@ -398,8 +397,7 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     GLOBAL_LIST_OF_SUBPROCESSES.append(os.getpid())
     device = get_dev('pvrusb')
 
-    logging.info('recording %s for %d seconds\n', recording_name,
-                 recording_time)
+    logging.info('recording %s for %d seconds\n', recording_name, recording_time)
 
     ### This needs to run before the server_thread is started
     if recording_name != 'test_roku':
@@ -418,10 +416,20 @@ def record_roku(recording_name='test_roku', recording_time=3600,
     cmd_q = Queue()
     mon_q = Queue()
 
-    net = Process(target=server_thread, args=(recording_name, msg_q, cmd_q,))
+    net = Process(
+        target=server_thread, args=(
+            recording_name,
+            msg_q,
+            cmd_q,
+        ))
     net.start()
 
-    cmd = Process(target=command_thread, args=(recording_name, msg_q, cmd_q,))
+    cmd = Process(
+        target=command_thread, args=(
+            recording_name,
+            msg_q,
+            cmd_q,
+        ))
     cmd.start()
     GLOBAL_LIST_OF_SUBPROCESSES.extend([net.pid, cmd.pid])
 
@@ -429,8 +437,8 @@ def record_roku(recording_name='test_roku', recording_time=3600,
 
     rec, mon = start_recording(device, recording_name, msg_q, mon_q)
     with open(KILLSCRIPT, 'w') as outfile:
-        outfile.write('kill -9 %d %d %d %d %d\n' %
-                      (net.pid, cmd.pid, mon.pid, rec.pid, os.getpid()))
+        outfile.write('kill -9 %d %d %d %d %d\n' % (net.pid, cmd.pid, mon.pid, rec.pid,
+                                                    os.getpid()))
 
     time.sleep(recording_time)
 
@@ -467,7 +475,7 @@ def main():
         recording_name = argv[1]
     if len(argv) > 2:
         try:
-            recording_time = int(argv[2])*60
+            recording_time = int(argv[2]) * 60
         except ValueError:
             pass
     if len(argv) > 3:
