@@ -20,15 +20,14 @@ console_scripts = (('run-recording', 'roku_app.record_roku:main'),
                     'roku_app.roku_utils:send_to_roku_main'), ('transcode-avi',
                                                                'roku_app.remcom:transcode_main'))
 
-if sys.version_info.major == 2:
-    console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]
-else:
-    v = sys.version_info.major
-    console_scripts = ['%s%s = %s' % (x, v, y) for x, y in console_scripts]
+console_scripts = ['%s = %s' % (x, y) for x, y in console_scripts]
+
+v = sys.version_info.major
+console_scripts.extend('%s%s = %s' % (x, v, y) for x, y in console_scripts)
 
 setup(
     name='roku_app',
-    version='0.0.5.4',
+    version='0.0.5.6',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='roku_app',
