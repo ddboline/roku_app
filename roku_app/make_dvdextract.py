@@ -36,8 +36,10 @@ def make_encoding_file(name):
 
 def read_dvd():
     """ run lsdvd """
-    command = run_command('lsdvd /dev/sr0', do_popen=True)
+    command = run_command('lsdvd /dev/dvd', do_popen=True)
     for line in command:
+        if hasattr(line, 'decode'):
+            line = line.decode()
         items = line.split()
         if len(items) == 0 or items[0] != 'Title:':
             continue
@@ -55,12 +57,12 @@ def run_extracting(title, chapter, name, aid, sid=-1, donav=False):
     if donav:
         dvd = 'dvdnav'
     if sid < 0:
-        command = 'mpv %s://%i --dvd-device=/dev/sr0 ' % (dvd, title,) + \
+        command = 'mpv %s://%i --dvd-device=/dev/dvd ' % (dvd, title,) + \
                   '--chapter=%i ' % chapter + \
                   '--stream-dump=%s/vob/%s.vob ' % (DIR, name,) + \
                   '--aid=%i ' % aid
     else:
-        command = 'mpv %s://%i --dvd-device=/dev/sr0  ' % (dvd, title,) + \
+        command = 'mpv %s://%i --dvd-device=/dev/dvd  ' % (dvd, title,) + \
                   '--chapter=%i ' % chapter + \
                   '--stream-dump=%s/vob/%s.vob ' % (DIR, name,) + \
                   '--aid=%i --sid=%i ' % (aid, sid_val,)
@@ -123,6 +125,8 @@ def make_dvdextract():
         elif os.sys.argv[1][0:4] == 'file' and len(os.sys.argv) > 2:
             conffile = open(os.sys.argv[2], 'r')
             for line in conffile:
+                if hasattr(line, 'decode'):
+                    line = line.decode()
                 items = line.split()
                 if len(items) == 0:
                     continue
