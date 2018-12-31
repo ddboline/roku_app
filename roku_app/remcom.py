@@ -57,7 +57,7 @@ def make_transcode_script(input_file):
         outfile.write('#!/bin/bash\n')
         outfile.write('nice -n 19 HandBrakeCLI ')
         outfile.write('-i %s -o %s ' % (input_file, output_file))
-        outfile.write('--preset "Android" ')
+        outfile.write('--preset "Android 480p30" ')
         outfile.write('> ~/dvdrip/log/%s_mp4.out 2>&1\n' % prefix)
         outfile.write('mv %s ~/Documents/movies/\n' % output_file)
         outfile.write('mv ~/dvdrip/log/%s_mp4.out ~/tmp_avi/\n' % prefix)

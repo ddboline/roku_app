@@ -27,7 +27,7 @@ console_scripts.extend('%s%s = %s' % (x, v, y) for x, y in console_scripts_)
 
 setup(
     name='roku_app',
-    version='0.0.5.6',
+    version='0.0.5.7',
     author='Daniel Boline',
     author_email='ddboline@gmail.com',
     description='roku_app',
